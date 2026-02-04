@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain } = require("electron");
+const { app, BrowserWindow, dialog, ipcMain, screen } = require("electron");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
@@ -9,9 +9,12 @@ const windowIcon = process.platform === "darwin"
   : path.join(__dirname, "assets", "icon-win.png");
 
 function createWindow() {
+  const workArea = screen.getPrimaryDisplay().workArea;
+  const width = Math.min(1100, Math.max(900, Math.floor(workArea.width * 0.85)));
+  const height = Math.min(820, Math.max(640, Math.floor(workArea.height * 0.85)));
   const win = new BrowserWindow({
-    width: 980,
-    height: 720,
+    width,
+    height,
     minWidth: 860,
     minHeight: 620,
     title: "Local Resource Diagnostic Tool",
@@ -59,6 +62,21 @@ function getNetworkIps() {
     });
   });
   return ips;
+}
+
+function runCommand(command, args) {
+  return new Promise((resolve) => {
+    execFile(command, args, { timeout: 120000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+      if (err) {
+        resolve({
+          ok: false,
+          output: `${stdout || ""}\n${stderr || ""}`.trim() || err.message
+        });
+        return;
+      }
+      resolve({ ok: true, output: `${stdout || ""}\n${stderr || ""}`.trim() });
+    });
+  });
 }
 
 function runPowerShellJson(script) {
@@ -306,7 +324,7 @@ async function collectDiagnostics(options) {
   const ideCaps = detectJetBrainsIdeCaps();
   const intellijCap = ideCaps.find((entry) => /intellij|idea/i.test(entry.product)) || null;
   const alternativeCaps = ideCaps.filter((entry) => !/intellij|idea/i.test(entry.product));
-  const cliTools = mode === "cli" ? await collectCliTools() : null;
+  const cliTools = await collectCliTools();
 
   const totalMemBytes = os.totalmem();
   const freeMemBytes = os.freemem();
@@ -376,9 +394,7 @@ async function collectDiagnostics(options) {
     };
   }
 
-  if (mode === "cli") {
-    diag.cli = cliTools;
-  }
+  diag.cli = cliTools;
 
   const speedtest = await runSpeedtestNet().catch((err) => ({
     ok: false,
@@ -507,6 +523,22 @@ function runSpeedtestNet() {
 ipcMain.handle("run-diagnostics", async (_event, options) => {
   const result = await collectDiagnostics(options);
   return result;
+});
+
+ipcMain.handle("run-setup", async (_event, action) => {
+  if (app.isPackaged) {
+    return { ok: false, output: "Setup commands are only available in the source (dev) build." };
+  }
+  if (process.platform !== "win32") {
+    return { ok: false, output: "Setup commands are only available on Windows." };
+  }
+  if (action === "install") {
+    return runCommand("npm.cmd", ["install"]);
+  }
+  if (action === "start") {
+    return runCommand("npm.cmd", ["start"]);
+  }
+  return { ok: false, output: "Unknown setup action." };
 });
 
 ipcMain.handle("export-results", async (event, payload) => {

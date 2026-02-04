@@ -8,6 +8,18 @@ const modal = document.getElementById("modal");
 const exportTxt = document.getElementById("exportTxt");
 const exportPdf = document.getElementById("exportPdf");
 const cancelExport = document.getElementById("cancelExport");
+const setupCard = document.getElementById("setupCard");
+const setupInstall = document.getElementById("setupInstall");
+const setupStart = document.getElementById("setupStart");
+const setupStatus = document.getElementById("setupStatus");
+const platformBadge = document.getElementById("platformBadge");
+const screenStart = document.getElementById("screenStart");
+const screenProgress = document.getElementById("screenProgress");
+const screenResults = document.getElementById("screenResults");
+const progressText = document.getElementById("progressText");
+const progressFill = document.getElementById("progressFill");
+const resultsBtn = document.getElementById("resultsBtn");
+const resultsStatus = document.getElementById("resultsStatus");
 
 let lastResults = null;
 
@@ -17,10 +29,25 @@ if (appIcon && window.diagnostics && window.diagnostics.platform) {
   appIcon.src = `assets/${iconFile}`;
 }
 
+if (platformBadge && window.diagnostics?.platform) {
+  platformBadge.textContent = window.diagnostics.platform === "darwin" ? "macOS" : "Windows";
+}
+
+if (window.diagnostics?.platform !== "win32" && setupCard) {
+  setupCard.style.display = "none";
+}
+
 
 function getSelectedValue(name) {
   const input = document.querySelector(`input[name="${name}"]:checked`);
   return input ? input.value : null;
+}
+
+function showScreen(screen) {
+  [screenStart, screenProgress, screenResults].forEach((node) => {
+    if (!node) return;
+    node.classList.toggle("hidden", node !== screen);
+  });
 }
 
 function formatForDisplay(obj) {
@@ -40,13 +67,13 @@ function formatForDisplay(obj) {
     ? obj.memory.alternativeIdeCaps.map((entry) => `${entry.product}: ${entry.xmxMb} MB`)
     : [];
   const cliTools = obj?.cli || null;
-  const cliLines = cliTools
-    ? Object.entries(cliTools).map(([name, info]) => {
-        const status = info?.ok ? "ok" : "missing";
-        const version = info?.version ? ` (${info.version})` : "";
-        return `- ${name}: ${status}${version}`;
-      })
-    : [];
+  const cliEntries = cliTools ? Object.entries(cliTools) : [];
+  const cliLines = cliEntries
+    .filter(([, info]) => info?.ok)
+    .map(([name, info]) => {
+      const version = info?.version ? ` (${info.version})` : "";
+      return `- ${name}: ok${version}`;
+    });
 
   const lines = [
     "OS",
@@ -167,6 +194,10 @@ function formatForPdf(obj) {
 async function runDiagnostics() {
   statusEl.textContent = "Running diagnostics...";
   exportBtn.disabled = true;
+  if (resultsStatus) resultsStatus.textContent = "Running...";
+  showScreen(screenProgress);
+  if (progressText) progressText.textContent = "Running checks...";
+  if (progressFill) progressFill.style.width = "30%";
   const privacy = getSelectedValue("privacy");
   const mode = getSelectedValue("mode");
 
@@ -178,10 +209,16 @@ async function runDiagnostics() {
     suggestionsList.innerHTML = suggestions.map((item) => `<li>${item}</li>`).join("");
     timestampEl.textContent = new Date().toLocaleString();
     statusEl.textContent = "Diagnostics complete.";
+    if (resultsStatus) resultsStatus.textContent = "Complete.";
     exportBtn.disabled = false;
+    if (progressText) progressText.textContent = "Wrapping up...";
+    if (progressFill) progressFill.style.width = "100%";
+    showScreen(screenResults);
   } catch (err) {
     statusEl.textContent = "Diagnostics failed.";
+    if (resultsStatus) resultsStatus.textContent = "Failed.";
     resultsEl.textContent = `Error: ${err.message || err}`;
+    showScreen(screenResults);
   }
 }
 
@@ -225,4 +262,33 @@ exportPdf.addEventListener("click", async () => {
   closeModal();
   await exportResults("pdf");
 });
+if (resultsBtn) {
+  resultsBtn.addEventListener("click", () => {
+    if (!lastResults) return;
+    showScreen(screenResults);
+  });
+}
+
+async function runSetup(action) {
+  if (!window.diagnostics?.runSetup) return;
+  setupStatus.textContent = action === "install" ? "Installing..." : "Starting...";
+  try {
+    const res = await window.diagnostics.runSetup(action);
+    setupStatus.textContent = res.ok ? "Done." : "Failed.";
+    if (res.output) {
+      resultsEl.textContent = res.output;
+    }
+  } catch (err) {
+    setupStatus.textContent = "Failed.";
+    resultsEl.textContent = `Error: ${err.message || err}`;
+  }
+}
+
+if (setupInstall) {
+  setupInstall.addEventListener("click", () => runSetup("install"));
+}
+
+if (setupStart) {
+  setupStart.addEventListener("click", () => runSetup("start"));
+}
 

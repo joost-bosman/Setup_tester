@@ -6,6 +6,8 @@ Small Windows + macOS diagnostics app with privacy controls and export.
 
 <table>
   <tr>
+    <td align="center" width="260" height="140"><b>Setup fase</b><br/>Install + Start</td>
+    <td align="center" width="60">-></td>
     <td align="center" width="260" height="140"><b>Input</b><br/>Mode + Privacy</td>
     <td align="center" width="60">-></td>
     <td align="center" width="260" height="140"><b>Diagnostics</b><br/>OS - CPU - GPU - Memory - Internet</td>
@@ -14,15 +16,10 @@ Small Windows + macOS diagnostics app with privacy controls and export.
   </tr>
 </table>
 
-## Run
-1. Install dependencies:
-   - `npm install`
-2. Start the app:
-   - `npm start`
-
 ## Features
 - Quick or full diagnostics
   - Tests: OS info, CPU, GPU, memory, internet latency.
+  - Tool also tests for possible CLI builds.
 - Privacy mode
   - Private (default) or public (redacted)
 - Export results to TXT or PDF
@@ -31,14 +28,17 @@ Small Windows + macOS diagnostics app with privacy controls and export.
 - Optimization suggestions based on the latest diagnostics
 
 ## Notes
-- Public mode redacts username, hostname, and home paths.
-- Private mode shows full system details.
-- Speedtest runs in a hidden window and can take up to ~60s; failures show as errors.
-- Some hardware fields (GPU cores/speed/voltage, CPU voltage) may be n/a depending on OS/driver support.
-- Windows build uses `assets/icon-win.ico` (generated from `assets/icon-win.png`).
+- Public mode redacts username/hostname/home paths; private mode shows all details.
+- Speedtest runs hidden (up to ~60s); failures show as errors.
+- Some hardware fields can be n/a (GPU cores/speed/voltage, CPU voltage).
+- Windows uses `assets/icon-win.ico` (generated from `assets/icon-win.png`).
+
+## Setup fase
+- Install dependencies: `npm install`
+- Start the app: `npm start`
 
 ## Build
-- Electron-based build.
+- Electron-based build (applies to both Windows and macOS).
 
 ### Windows tool
 - `npm run pack` (folder build)
@@ -60,5 +60,6 @@ Small Windows + macOS diagnostics app with privacy controls and export.
 Source icons:
 - http://toastytech.com/guis/win98.html
 - https://www.aicerts.ai/news/apple-ai-strategy-the-invisible-approach-wall-street-is-questioning/
+- https://www.speedtest.net/
 
 
