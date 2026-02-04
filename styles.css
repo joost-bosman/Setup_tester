@@ -144,6 +144,21 @@ button:disabled {
   min-height: 240px;
 }
 
+.suggestions {
+  margin-top: 16px;
+  background: var(--card);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+#suggestionsList {
+  margin: 8px 0 0 18px;
+  color: #dbe4f3;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .results-header {
   display: flex;
   justify-content: space-between;

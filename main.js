@@ -2,6 +2,7 @@ const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
 const os = require("os");
 const https = require("https");
+const { execFile } = require("child_process");
 
 const DEFAULT_TEST_URL = "https://www.google.com/generate_204";
 const windowIcon = process.platform === "darwin"
@@ -85,11 +86,64 @@ function redactObject(obj, redactions) {
   return redactValue(obj, redactions);
 }
 
+function detectGpuVendor(model) {
+  if (!model || typeof model !== "string") return null;
+  const name = model.toLowerCase();
+  if (name.includes("nvidia")) return { name: "NVIDIA", url: "https://www.nvidia.com/" };
+  if (name.includes("amd") || name.includes("radeon")) return { name: "AMD", url: "https://www.amd.com/" };
+  if (name.includes("intel")) return { name: "Intel", url: "https://www.intel.com/" };
+  if (name.includes("apple")) return { name: "Apple", url: "https://www.apple.com/" };
+  return null;
+}
+
+function summarizeGpu(gpuInfo) {
+  const device =
+    gpuInfo?.gpuDevice?.[0] ||
+    gpuInfo?.graphics?.[0] ||
+    gpuInfo?.graphics?.[0]?.devices?.[0] ||
+    null;
+
+  const name =
+    device?.deviceString ||
+    device?.vendorString ||
+    device?.name ||
+    device?.device ||
+    "n/a";
+
+  const vendor = detectGpuVendor(name);
+  return {
+    name,
+    vendorId: device?.vendorId || device?.vendor_id || null,
+    deviceId: device?.deviceId || device?.device_id || null,
+    driverVersion: device?.driverVersion || device?.driver_version || null,
+    vendorLink: vendor?.url || null
+  };
+}
+
+function checkMacOsUpdates() {
+  return new Promise((resolve) => {
+    execFile("softwareupdate", ["-l"], { timeout: 12000 }, (err, stdout, stderr) => {
+      const output = `${stdout || ""}\n${stderr || ""}`.toLowerCase();
+      if (output.includes("no new software available") || output.includes("no updates are available")) {
+        resolve({ status: "up_to_date" });
+        return;
+      }
+      if (err && !output.trim()) {
+        resolve({ status: "unknown", error: err.message });
+        return;
+      }
+      resolve({ status: "updates_available" });
+    });
+  });
+}
+
 async function collectDiagnostics(options) {
   const mode = options?.mode || "quick";
   const privacy = options?.privacy || "private";
   const cpuInfo = os.cpus();
   const gpuInfo = await app.getGPUInfo("complete").catch(() => ({}));
+  const macUpdate =
+    process.platform === "darwin" ? await checkMacOsUpdates().catch(() => ({ status: "unknown" })) : null;
 
   const diag = {
     timestamp: new Date().toISOString(),
@@ -98,7 +152,8 @@ async function collectDiagnostics(options) {
       release: os.release(),
       version: os.version ? os.version() : "n/a",
       arch: os.arch(),
-      hostname: os.hostname()
+      hostname: os.hostname(),
+      updateStatus: macUpdate?.status || "n/a"
     },
     cpu: {
       model: cpuInfo?.[0]?.model || "n/a",
@@ -110,12 +165,20 @@ async function collectDiagnostics(options) {
       total: formatBytes(os.totalmem()),
       free: formatBytes(os.freemem())
     },
+    app: {
+      name: app.getName(),
+      version: app.getVersion(),
+      electron: process.versions.electron,
+      node: process.versions.node,
+      chrome: process.versions.chrome,
+      javaHome: process.env.JAVA_HOME || null
+    },
     internet: {}
   };
 
   if (mode === "full") {
     diag.gpu = {
-      ...gpuInfo
+      ...summarizeGpu(gpuInfo)
     };
     diag.process = {
       nodeVersion: process.version,

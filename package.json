@@ -5,12 +5,13 @@
     "main":  "main.js",
     "scripts":  {
                     "start":  "electron .",
-                    "pack":  "electron-builder --dir",
-                    "build":  "electron-builder"
+                    "pack":  "node scripts/generate-icons.js && electron-builder --dir",
+                    "build":  "node scripts/generate-icons.js && electron-builder"
                 },
     "devDependencies":  {
                             "electron":  "^28.3.3",
-                            "electron-builder":  "^24.13.3"
+                            "electron-builder":  "^24.13.3",
+                            "png-to-ico":  "^2.1.0"
                         },
     "productName":  "Local Resource Diagnostic Tool",
     "build":  {
@@ -29,7 +30,7 @@
                           },
                   "win":  {
                               "target":  "nsis",
-                              "icon":  "assets/icon-win.png"
+                              "icon":  "assets/icon-win.ico"
                           },
                   "appId":  "com.joostbosman.localresourcediagnostictool"
               }
