@@ -2,6 +2,16 @@
 
 Small Windows + macOS diagnostics app with privacy controls and export.
 
+<table>
+  <tr>
+    <td align="center" width="260" height="140"><b>Input</b><br/>Mode + Privacy</td>
+    <td align="center" width="60">-></td>
+    <td align="center" width="260" height="140"><b>Diagnostics</b><br/>OS - CPU - GPU - Memory - Internet</td>
+    <td align="center" width="60">-></td>
+    <td align="center" width="260" height="140"><b>Output</b><br/>Results + Suggestions + Export</td>
+  </tr>
+</table>
+
 ## Run
 1. Install dependencies:
    - `npm install`
@@ -42,18 +52,4 @@ Source icons:
 - http://toastytech.com/guis/win98.html
 - https://www.aicerts.ai/news/apple-ai-strategy-the-invisible-approach-wall-street-is-questioning/
 
-## Flow chart
-```mermaid
-flowchart TD
-  A[User selects privacy + mode] --> B[Run diagnostics]
-  B --> C[Main process collects system info]
-  C --> D[Internet latency check]
-  C --> E[GPU summary if full mode]
-  C --> F[macOS update status if on macOS]
-  C --> G[Build suggestions]
-  C --> H[Render results + suggestions]
-  H --> I{Export?}
-  I -->|TXT| J[Write text file]
-  I -->|PDF| K[Render HTML and print to PDF]
-```
 
