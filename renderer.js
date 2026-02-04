@@ -22,6 +22,7 @@ const resultsStatus = document.getElementById("resultsStatus");
 const closeApp = document.getElementById("closeApp");
 
 let lastResults = null;
+let lastOptions = null;
 
 const appIcon = document.querySelector(".app-icon");
 if (appIcon && window.diagnostics && window.diagnostics.platform) {
@@ -41,6 +42,11 @@ if (window.diagnostics?.platform !== "win32" && setupCard) {
 function getSelectedValue(name) {
   const input = document.querySelector(`input[name="${name}"]:checked`);
   return input ? input.value : null;
+}
+
+function getSelectedCheckbox(name, fallback = true) {
+  const input = document.querySelector(`input[name="${name}"]`);
+  return input ? input.checked : fallback;
 }
 
 function showScreen(screen) {
@@ -136,13 +142,20 @@ function getSuggestions(diag) {
   const suggestions = [];
   if (!diag) return suggestions;
 
-  const totalMem = Number(diag?.memory?.total?.replace(/[^\d.]/g, ""));
-  const freeMem = Number(diag?.memory?.free?.replace(/[^\d.]/g, ""));
+  const totalMem = Number(diag?.memory?.total?.replace(/[^\d.]/g, "")); // parse total RAM (MB/GB string)
+  const freeMem = Number(diag?.memory?.free?.replace(/[^\d.]/g, "")); // parse free RAM (MB/GB string)
   if (Number.isFinite(totalMem) && Number.isFinite(freeMem) && totalMem > 0) {
     const freeRatio = freeMem / totalMem;
+    const usedRatio = 1 - freeRatio;
     if (freeRatio < 0.2) {
       suggestions.push("Low free memory: close unused apps or restart to free RAM.");
     }
+    if (usedRatio >= 0.9) {
+      suggestions.push("RAM use >= 90%: close heavy apps, pause builds, or increase system RAM.");
+    } else if (usedRatio >= 0.8) {
+      suggestions.push("RAM use >= 80%: consider closing apps or increasing RAM if this is common.");
+    }
+    suggestions.push("Keep 20% free RAM for cache and OS tasks; 10% is the minimum to avoid slowdowns.");
   }
 
   const loadAvg = diag?.cpu?.loadAvg;
@@ -190,7 +203,7 @@ function getSuggestions(diag) {
 }
 
 function formatForText(obj) {
-  const suggestions = getSuggestions(obj);
+  const suggestions = lastOptions?.includeOptimization ? getSuggestions(obj) : ["Optimization checks disabled."];
   return [
     formatForDisplay(obj),
     "",
@@ -200,7 +213,7 @@ function formatForText(obj) {
 }
 
 function formatForPdf(obj) {
-  const suggestions = getSuggestions(obj);
+  const suggestions = lastOptions?.includeOptimization ? getSuggestions(obj) : ["Optimization checks disabled."];
   return [
     formatForDisplay(obj),
     "",
@@ -218,12 +231,22 @@ async function runDiagnostics() {
   if (progressFill) progressFill.style.width = "30%";
   const privacy = getSelectedValue("privacy");
   const mode = getSelectedValue("mode");
+  const includeSoftware = getSelectedCheckbox("extraSoftware", true);
+  const includeDependencies = getSelectedCheckbox("extraDependencies", true);
+  const includeOptimization = getSelectedCheckbox("extraOptimization", true);
 
   try {
-    const data = await window.diagnostics.run({ privacy, mode });
+    const data = await window.diagnostics.run({
+      privacy,
+      mode,
+      includeSoftware,
+      includeDependencies,
+      includeOptimization
+    });
+    lastOptions = { includeSoftware, includeDependencies, includeOptimization };
     lastResults = data;
     resultsEl.textContent = formatForDisplay(data);
-    const suggestions = getSuggestions(data);
+    const suggestions = includeOptimization ? getSuggestions(data) : ["Optimization checks disabled."];
     suggestionsList.innerHTML = suggestions.map((item) => `<li>${item}</li>`).join("");
     if (timestampEl) timestampEl.textContent = new Date().toLocaleString();
     statusEl.textContent = "Diagnostics complete.";

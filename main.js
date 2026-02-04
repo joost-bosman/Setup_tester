@@ -412,12 +412,16 @@ async function collectDiagnostics(options) {
   const intellijCap = ideCaps.find((entry) => /intellij|idea/i.test(entry.product)) || null;
   const alternativeCaps = ideCaps.filter((entry) => !/intellij|idea/i.test(entry.product));
   const cliTools = await collectCliTools();
+  const includeSoftware = options?.includeSoftware !== false; // optional software scan
+  const includeDependencies = options?.includeDependencies !== false; // optional tools/languages scan
   const softwareList = process.platform === "darwin" ? getMacSoftwareList() : getWindowsSoftwareList();
-  const software = softwareList.map((item) => ({
-    name: item.name,
-    present: checkAnyPaths(item.paths)
-  }));
-  const dependencies = await getDependenciesList();
+  const software = includeSoftware
+    ? softwareList.map((item) => ({
+        name: item.name,
+        present: checkAnyPaths(item.paths)
+      }))
+    : [];
+  const dependencies = includeDependencies ? await getDependenciesList() : [];
 
   const totalMemBytes = os.totalmem();
   const freeMemBytes = os.freemem();
