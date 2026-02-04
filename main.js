@@ -161,10 +161,94 @@ function checkCommand(cmd, args) {
   });
 }
 
+function checkAnyPaths(paths) {
+  return paths.some((p) => {
+    if (!p) return false;
+    try {
+      return fs.existsSync(p);
+    } catch {
+      return false;
+    }
+  });
+}
+
+function getWindowsSoftwareList() {
+  const programFiles = process.env.ProgramFiles || "C:\\Program Files";
+  const programFilesX86 = process.env["ProgramFiles(x86)"] || "C:\\Program Files (x86)";
+  const localApp = process.env.LOCALAPPDATA || "";
+
+  return [
+    { name: "Visual Studio Code", paths: [path.join(programFiles, "Microsoft VS Code", "Code.exe")] },
+    { name: "Visual Studio", paths: [path.join(programFiles, "Microsoft Visual Studio")] },
+    { name: "IntelliJ IDEA", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "IDEA")] },
+    { name: "Android Studio", paths: [path.join(programFiles, "Android", "Android Studio", "bin", "studio64.exe")] },
+    { name: "PyCharm", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "PyCharm")] },
+    { name: "WebStorm", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "WebStorm")] },
+    { name: "Rider", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "Rider")] },
+    { name: "Eclipse", paths: [path.join(programFiles, "eclipse"), path.join(programFilesX86, "eclipse")] },
+    { name: "CLion", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "CLion")] },
+    { name: "DataGrip", paths: [path.join(programFiles, "JetBrains"), path.join(localApp, "JetBrains", "Toolbox", "apps", "DataGrip")] }
+  ];
+}
+
+function getMacSoftwareList() {
+  return [
+    { name: "Visual Studio Code", paths: ["/Applications/Visual Studio Code.app"] },
+    { name: "Xcode", paths: ["/Applications/Xcode.app"] },
+    { name: "IntelliJ IDEA", paths: ["/Applications/IntelliJ IDEA.app", "/Applications/IntelliJ IDEA CE.app"] },
+    { name: "Android Studio", paths: ["/Applications/Android Studio.app"] },
+    { name: "PyCharm", paths: ["/Applications/PyCharm.app", "/Applications/PyCharm CE.app"] },
+    { name: "WebStorm", paths: ["/Applications/WebStorm.app"] },
+    { name: "Rider", paths: ["/Applications/Rider.app"] },
+    { name: "CLion", paths: ["/Applications/CLion.app"] },
+    { name: "DataGrip", paths: ["/Applications/DataGrip.app"] },
+    { name: "Sublime Text", paths: ["/Applications/Sublime Text.app"] }
+  ];
+}
+
+async function getDependenciesList() {
+  const sqlCommands = process.platform === "win32"
+    ? ["sqlcmd", "sqlite3", "psql", "mysql"]
+    : ["psql", "mysql", "sqlite3"];
+  const nodeCommand = "node";
+  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+
+  const items = [
+    { name: "Python", commands: ["python", "python3"] },
+    { name: "JavaScript (Node.js)", commands: [nodeCommand] },
+    { name: "TypeScript", commands: ["tsc"] },
+    { name: "Java", commands: ["java"] },
+    { name: "SQL tools", commands: sqlCommands },
+    { name: "Git", commands: ["git"] },
+    { name: "GitHub CLI", commands: ["gh"] },
+    { name: "Docker", commands: ["docker"] },
+    { name: "Visual Studio Code CLI", commands: ["code"] },
+    { name: "IntelliJ CLI", commands: ["idea"] }
+  ];
+
+  const results = [];
+  for (const item of items) {
+    let found = false;
+    let version = null;
+    for (const cmd of item.commands) {
+      // eslint-disable-next-line no-await-in-loop
+      const res = await checkCommand(cmd, ["--version"]);
+      if (res.ok) {
+        found = true;
+        version = res.version;
+        break;
+      }
+    }
+    results.push({ name: item.name, present: found, version });
+  }
+  return results;
+}
+
 async function collectCliTools() {
+  const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const tools = [
     { name: "node", cmd: "node", args: ["-v"] },
-    { name: "npm", cmd: "npm", args: ["-v"] },
+    { name: "npm", cmd: npmCmd, args: ["-v"] },
     { name: "git", cmd: "git", args: ["--version"] },
     { name: "java", cmd: "java", args: ["-version"] },
     { name: "powershell", cmd: "powershell", args: ["-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"] }
@@ -328,6 +412,12 @@ async function collectDiagnostics(options) {
   const intellijCap = ideCaps.find((entry) => /intellij|idea/i.test(entry.product)) || null;
   const alternativeCaps = ideCaps.filter((entry) => !/intellij|idea/i.test(entry.product));
   const cliTools = await collectCliTools();
+  const softwareList = process.platform === "darwin" ? getMacSoftwareList() : getWindowsSoftwareList();
+  const software = softwareList.map((item) => ({
+    name: item.name,
+    present: checkAnyPaths(item.paths)
+  }));
+  const dependencies = await getDependenciesList();
 
   const totalMemBytes = os.totalmem();
   const freeMemBytes = os.freemem();
@@ -398,6 +488,8 @@ async function collectDiagnostics(options) {
   }
 
   diag.cli = cliTools;
+  diag.software = software;
+  diag.dependencies = dependencies;
 
   const speedtest = await runSpeedtestNet().catch((err) => ({
     ok: false,

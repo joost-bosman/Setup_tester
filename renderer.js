@@ -18,7 +18,6 @@ const screenProgress = document.getElementById("screenProgress");
 const screenResults = document.getElementById("screenResults");
 const progressText = document.getElementById("progressText");
 const progressFill = document.getElementById("progressFill");
-const resultsBtn = document.getElementById("resultsBtn");
 const resultsStatus = document.getElementById("resultsStatus");
 const closeApp = document.getElementById("closeApp");
 
@@ -80,6 +79,15 @@ function formatForDisplay(obj) {
     cliLines.push("- note: install Node.js (includes npm) to enable CLI builds.");
   }
 
+  const softwareList = Array.isArray(obj?.software) ? obj.software : [];
+  const softwareLines = softwareList.map((item) => `- ${item.name}: ${item.present ? "ok" : "missing"}`);
+
+  const dependencyList = Array.isArray(obj?.dependencies) ? obj.dependencies : [];
+  const dependencyLines = dependencyList.map((item) => {
+    const version = item.version ? ` (${item.version})` : "";
+    return `- ${item.name}: ${item.present ? "ok" : "missing"}${version}`;
+  });
+
   const lines = [
     "OS",
     `- version: ${formatValue(obj?.os?.version)}`,
@@ -116,7 +124,9 @@ function formatForDisplay(obj) {
     `- upload: ${toMBps(obj?.internet?.uploadMbps)} MB/s`,
     `- ping: ${formatValue(obj?.internet?.pingMs)} ms`,
     `- status: ${formatValue(obj?.internet?.ok ? "ok" : obj?.internet?.error || "n/a")}`,
-    ...(cliLines.length ? ["", "CLI Tools", ...cliLines] : [])
+    ...(cliLines.length ? ["", "CLI Tools", ...cliLines] : []),
+    ...(softwareLines.length ? ["", "Software/IDEs installed", ...softwareLines] : []),
+    ...(dependencyLines.length ? ["", "Tools & Languages", ...dependencyLines] : [])
   ];
 
   return lines.join("\n");
@@ -270,12 +280,6 @@ exportPdf.addEventListener("click", async () => {
   closeModal();
   await exportResults("pdf");
 });
-if (resultsBtn) {
-  resultsBtn.addEventListener("click", () => {
-    if (!lastResults) return;
-    showScreen(screenResults);
-  });
-}
 
 if (closeApp) {
   closeApp.addEventListener("click", () => {
