@@ -39,6 +39,14 @@ function formatForDisplay(obj) {
   const ideCaps = Array.isArray(obj?.memory?.alternativeIdeCaps)
     ? obj.memory.alternativeIdeCaps.map((entry) => `${entry.product}: ${entry.xmxMb} MB`)
     : [];
+  const cliTools = obj?.cli || null;
+  const cliLines = cliTools
+    ? Object.entries(cliTools).map(([name, info]) => {
+        const status = info?.ok ? "ok" : "missing";
+        const version = info?.version ? ` (${info.version})` : "";
+        return `- ${name}: ${status}${version}`;
+      })
+    : [];
 
   const lines = [
     "OS",
@@ -75,7 +83,8 @@ function formatForDisplay(obj) {
     `- download: ${toMBps(obj?.internet?.downloadMbps)} MB/s`,
     `- upload: ${toMBps(obj?.internet?.uploadMbps)} MB/s`,
     `- ping: ${formatValue(obj?.internet?.pingMs)} ms`,
-    `- status: ${formatValue(obj?.internet?.ok ? "ok" : obj?.internet?.error || "n/a")}`
+    `- status: ${formatValue(obj?.internet?.ok ? "ok" : obj?.internet?.error || "n/a")}`,
+    ...(cliLines.length ? ["", "CLI Tools", ...cliLines] : [])
   ];
 
   return lines.join("\n");
@@ -115,6 +124,13 @@ function getSuggestions(diag) {
 
   if (!diag?.gpu) {
     suggestions.push("Run full diagnostics to include GPU and process details.");
+  }
+
+  const missingTools = Object.entries(diag?.cli || {})
+    .filter(([, info]) => info?.ok === false)
+    .map(([name]) => name);
+  if (missingTools.length) {
+    suggestions.push(`Missing CLI tools: ${missingTools.join(", ")}.`);
   }
 
   if (Number.isFinite(diag?.memory?.intellijCapMb) || (diag?.memory?.alternativeIdeCaps || []).length > 0) {

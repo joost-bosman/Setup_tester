@@ -121,6 +121,41 @@ async function getWindowsGpuDetails() {
   };
 }
 
+function extractVersion(output) {
+  if (!output) return null;
+  const lines = output.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  return lines.length ? lines[0] : null;
+}
+
+function checkCommand(cmd, args) {
+  return new Promise((resolve) => {
+    execFile(cmd, args, { timeout: 6000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+      const output = `${stdout || ""}\n${stderr || ""}`.trim();
+      if (err && !output) {
+        resolve({ ok: false, version: null });
+        return;
+      }
+      resolve({ ok: true, version: extractVersion(output) });
+    });
+  });
+}
+
+async function collectCliTools() {
+  const tools = [
+    { name: "node", cmd: "node", args: ["-v"] },
+    { name: "npm", cmd: "npm", args: ["-v"] },
+    { name: "git", cmd: "git", args: ["--version"] },
+    { name: "java", cmd: "java", args: ["-version"] },
+    { name: "powershell", cmd: "powershell", args: ["-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"] }
+  ];
+
+  const results = {};
+  for (const tool of tools) {
+    results[tool.name] = await checkCommand(tool.cmd, tool.args);
+  }
+  return results;
+}
+
 function parseXmxValue(text) {
   if (!text) return null;
   const match = text.match(/-Xmx(\d+)([mMgG])/);
@@ -271,6 +306,7 @@ async function collectDiagnostics(options) {
   const ideCaps = detectJetBrainsIdeCaps();
   const intellijCap = ideCaps.find((entry) => /intellij|idea/i.test(entry.product)) || null;
   const alternativeCaps = ideCaps.filter((entry) => !/intellij|idea/i.test(entry.product));
+  const cliTools = mode === "cli" ? await collectCliTools() : null;
 
   const totalMemBytes = os.totalmem();
   const freeMemBytes = os.freemem();
@@ -338,6 +374,10 @@ async function collectDiagnostics(options) {
       nodeVersion: process.version,
       platform: process.platform
     };
+  }
+
+  if (mode === "cli") {
+    diag.cli = cliTools;
   }
 
   const speedtest = await runSpeedtestNet().catch((err) => ({
