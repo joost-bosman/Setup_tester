@@ -4,9 +4,10 @@
     "description":  "Local system diagnostics app (Windows + macOS) with privacy controls.",
     "main":  "main.js",
     "scripts":  {
-                    "start":  "electron .",
-                    "pack":  "node scripts/generate-icons.js && electron-builder --dir",
-                    "build":  "node scripts/generate-icons.js && electron-builder"
+        "start":  "electron .",
+        "pack":  "node scripts/generate-icons.js && electron-builder --dir",
+        "build":  "node scripts/generate-icons.js && electron-builder",
+        "smoke":  "node scripts/smoke-test.js"
                 },
     "devDependencies":  {
                             "electron":  "^28.3.3",

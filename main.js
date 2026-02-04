@@ -1,10 +1,9 @@
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("path");
 const os = require("os");
-const https = require("https");
+const fs = require("fs");
 const { execFile } = require("child_process");
 
-const DEFAULT_TEST_URL = "https://www.google.com/generate_204";
 const windowIcon = process.platform === "darwin"
   ? path.join(__dirname, "assets", "icon-mac.png")
   : path.join(__dirname, "assets", "icon-win.png");
@@ -47,19 +46,140 @@ function ddmmyyStamp(date = new Date()) {
   return `${dd}${mm}${yy}`;
 }
 
-function timeRequest(url) {
-  return new Promise((resolve) => {
-    const start = Date.now();
-    const req = https.get(url, (res) => {
-      res.on("data", () => {});
-      res.on("end", () => resolve({ ok: true, ms: Date.now() - start, status: res.statusCode }));
-    });
-    req.on("error", (err) => resolve({ ok: false, ms: Date.now() - start, error: err.message }));
-    req.setTimeout(8000, () => {
-      req.destroy();
-      resolve({ ok: false, ms: Date.now() - start, error: "timeout" });
+function getNetworkIps() {
+  const nets = os.networkInterfaces();
+  const ips = [];
+  Object.values(nets).forEach((entries) => {
+    entries?.forEach((entry) => {
+      if (!entry) return;
+      if (entry.internal) return;
+      if (entry.family === "IPv4") {
+        ips.push(entry.address);
+      }
     });
   });
+  return ips;
+}
+
+function runPowerShellJson(script) {
+  return new Promise((resolve) => {
+    execFile(
+      "powershell",
+      ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script],
+      { timeout: 8000, maxBuffer: 1024 * 1024 },
+      (err, stdout) => {
+        if (err || !stdout) {
+          resolve(null);
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdout));
+        } catch {
+          resolve(null);
+        }
+      }
+    );
+  });
+}
+
+async function getWindowsCpuDetails() {
+  const data = await runPowerShellJson(
+    "Get-CimInstance Win32_Processor | Select-Object -First 1 Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors, CurrentClockSpeed, MaxClockSpeed, CurrentVoltage | ConvertTo-Json"
+  );
+  if (!data) return null;
+  return {
+    vendor: data.Manufacturer || null,
+    model: data.Name || null,
+    cores: data.NumberOfLogicalProcessors || data.NumberOfCores || null,
+    currentClockMHz: data.CurrentClockSpeed || data.MaxClockSpeed || null,
+    voltage: data.CurrentVoltage || null
+  };
+}
+
+async function getWindowsMemoryModules() {
+  const data = await runPowerShellJson(
+    "Get-CimInstance Win32_PhysicalMemory | Select-Object Manufacturer, Capacity, Speed, ConfiguredVoltage | ConvertTo-Json"
+  );
+  if (!data) return [];
+  const modules = Array.isArray(data) ? data : [data];
+  return modules.map((mod) => ({
+    vendor: mod.Manufacturer || null,
+    capacityBytes: Number(mod.Capacity) || null,
+    speedMHz: mod.Speed || null,
+    voltage: mod.ConfiguredVoltage || null
+  }));
+}
+
+async function getWindowsGpuDetails() {
+  const data = await runPowerShellJson(
+    "Get-CimInstance Win32_VideoController | Select-Object -First 1 Name, AdapterCompatibility, VideoProcessor | ConvertTo-Json"
+  );
+  if (!data) return null;
+  return {
+    vendor: data.AdapterCompatibility || null,
+    chip: data.VideoProcessor || data.Name || null
+  };
+}
+
+function parseXmxValue(text) {
+  if (!text) return null;
+  const match = text.match(/-Xmx(\d+)([mMgG])/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value)) return null;
+  const unit = match[2].toLowerCase();
+  return unit === "g" ? value * 1024 : value;
+}
+
+function detectJetBrainsIdeCaps() {
+  const roots = [];
+  if (process.env.APPDATA) {
+    roots.push(path.join(process.env.APPDATA, "JetBrains"));
+  }
+  if (process.env.LOCALAPPDATA) {
+    roots.push(path.join(process.env.LOCALAPPDATA, "JetBrains"));
+    roots.push(path.join(process.env.LOCALAPPDATA, "JetBrains", "Toolbox", "apps"));
+  }
+
+  const ideCaps = [];
+  const seen = new Set();
+
+  const scanDir = (dir, depth = 0) => {
+    if (depth > 5) return;
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scanDir(full, depth + 1);
+        continue;
+      }
+      if (!entry.isFile() || !entry.name.toLowerCase().endsWith(".vmoptions")) continue;
+      if (seen.has(full)) continue;
+      seen.add(full);
+      let content;
+      try {
+        content = fs.readFileSync(full, "utf8");
+      } catch {
+        continue;
+      }
+      const xmxMb = parseXmxValue(content);
+      if (!xmxMb) continue;
+      const product = entry.name.replace(/\.vmoptions$/i, "");
+      ideCaps.push({
+        product,
+        xmxMb,
+        path: full
+      });
+    }
+  };
+
+  roots.forEach((root) => scanDir(root));
+  return ideCaps;
 }
 
 function redactValue(value, redactions) {
@@ -144,6 +264,20 @@ async function collectDiagnostics(options) {
   const gpuInfo = await app.getGPUInfo("complete").catch(() => ({}));
   const macUpdate =
     process.platform === "darwin" ? await checkMacOsUpdates().catch(() => ({ status: "unknown" })) : null;
+  const ips = getNetworkIps();
+  const windowsCpu = process.platform === "win32" ? await getWindowsCpuDetails() : null;
+  const windowsMemoryModules = process.platform === "win32" ? await getWindowsMemoryModules() : [];
+  const windowsGpu = process.platform === "win32" ? await getWindowsGpuDetails() : null;
+  const ideCaps = detectJetBrainsIdeCaps();
+  const intellijCap = ideCaps.find((entry) => /intellij|idea/i.test(entry.product)) || null;
+  const alternativeCaps = ideCaps.filter((entry) => !/intellij|idea/i.test(entry.product));
+
+  const totalMemBytes = os.totalmem();
+  const freeMemBytes = os.freemem();
+  const usedMemBytes = totalMemBytes - freeMemBytes;
+  const speeds = cpuInfo.map((cpu) => cpu.speed).filter((speed) => Number.isFinite(speed));
+  const totalSpeedMHz = speeds.reduce((sum, speed) => sum + speed, 0);
+  const totalSpeedGHz = totalSpeedMHz ? totalSpeedMHz / 1000 : null;
 
   const diag = {
     timestamp: new Date().toISOString(),
@@ -153,17 +287,31 @@ async function collectDiagnostics(options) {
       version: os.version ? os.version() : "n/a",
       arch: os.arch(),
       hostname: os.hostname(),
+      ip: ips,
       updateStatus: macUpdate?.status || "n/a"
     },
     cpu: {
-      model: cpuInfo?.[0]?.model || "n/a",
-      cores: cpuInfo.length,
-      speedMHz: cpuInfo?.[0]?.speed || "n/a",
+      vendor: windowsCpu?.vendor || null,
+      model: windowsCpu?.model || cpuInfo?.[0]?.model || "n/a",
+      cores: windowsCpu?.cores || cpuInfo.length,
+      totalSpeedMHz: totalSpeedMHz || null,
+      totalSpeedGHz: totalSpeedGHz ? Number(totalSpeedGHz.toFixed(2)) : null,
+      voltage: windowsCpu?.voltage || null,
       loadAvg: os.loadavg()
     },
     memory: {
-      total: formatBytes(os.totalmem()),
-      free: formatBytes(os.freemem())
+      total: formatBytes(totalMemBytes),
+      used: formatBytes(usedMemBytes),
+      free: formatBytes(freeMemBytes),
+      moduleVendors: Array.from(
+        new Set(windowsMemoryModules.map((mod) => mod.vendor).filter(Boolean))
+      ),
+      modules: windowsMemoryModules,
+      intellijCapMb: intellijCap?.xmxMb || null,
+      alternativeIdeCaps: alternativeCaps.map((entry) => ({
+        product: entry.product,
+        xmxMb: entry.xmxMb
+      }))
     },
     app: {
       name: app.getName(),
@@ -176,23 +324,33 @@ async function collectDiagnostics(options) {
     internet: {}
   };
 
+  diag.gpu = {
+    vendor: windowsGpu?.vendor || detectGpuVendor(summarizeGpu(gpuInfo).name)?.name || null,
+    chip: windowsGpu?.chip || summarizeGpu(gpuInfo).name || null,
+    cores: null,
+    speedMHz: null,
+    speedGHz: null,
+    voltage: null
+  };
+
   if (mode === "full") {
-    diag.gpu = {
-      ...summarizeGpu(gpuInfo)
-    };
     diag.process = {
       nodeVersion: process.version,
       platform: process.platform
     };
   }
 
-  const internetCheck = await timeRequest(DEFAULT_TEST_URL);
+  const speedtest = await runSpeedtestNet().catch((err) => ({
+    ok: false,
+    error: err.message || String(err)
+  }));
   diag.internet = {
-    testUrl: DEFAULT_TEST_URL,
-    ok: internetCheck.ok,
-    status: internetCheck.status || "n/a",
-    latencyMs: internetCheck.ms,
-    error: internetCheck.error || null
+    testUrl: "https://www.speedtest.net/",
+    ok: speedtest.ok,
+    downloadMbps: speedtest.downloadMbps || null,
+    uploadMbps: speedtest.uploadMbps || null,
+    pingMs: speedtest.pingMs || null,
+    error: speedtest.error || null
   };
 
   if (privacy === "public") {
@@ -206,11 +364,104 @@ async function collectDiagnostics(options) {
     const redacted = redactObject(diag, redactions);
     if (redacted.os) {
       redacted.os.hostname = "[redacted]";
+      redacted.os.ip = Array.isArray(redacted.os.ip) ? redacted.os.ip.map(() => "[redacted]") : "[redacted]";
     }
     return redacted;
   }
 
   return diag;
+}
+
+function runSpeedtestNet() {
+  return new Promise((resolve) => {
+    const speedWindow = new BrowserWindow({
+      show: false,
+      width: 800,
+      height: 600,
+      backgroundColor: "#0f1115",
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true,
+        backgroundThrottling: false
+      }
+    });
+
+    speedWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+
+    const timeout = setTimeout(() => {
+      speedWindow.close();
+      resolve({ ok: false, error: "speedtest timeout" });
+    }, 60000);
+
+    const pollResults = async () => {
+      try {
+        const data = await speedWindow.webContents.executeJavaScript(
+          `
+          (() => {
+            const pick = (selectors) => {
+              for (const sel of selectors) {
+                const el = document.querySelector(sel);
+                if (el && el.textContent) return el.textContent.trim();
+              }
+              return null;
+            };
+            const download = pick([".download-speed", "span.download-speed", "[data-testid='download-speed']"]);
+            const upload = pick([".upload-speed", "span.upload-speed", "[data-testid='upload-speed']"]);
+            const ping = pick([".ping-speed", "span.ping-speed", "[data-testid='ping-speed']"]);
+            return { download, upload, ping };
+          })()
+        `,
+          true
+        );
+
+        if (data?.download && data?.upload && data?.ping) {
+          clearTimeout(timeout);
+          speedWindow.close();
+          const toNumber = (value) => {
+            const num = Number(String(value).replace(/[^\d.]/g, ""));
+            return Number.isFinite(num) ? num : null;
+          };
+          resolve({
+            ok: true,
+            downloadMbps: toNumber(data.download),
+            uploadMbps: toNumber(data.upload),
+            pingMs: toNumber(data.ping)
+          });
+          return;
+        }
+      } catch {
+        // keep polling
+      }
+      setTimeout(pollResults, 1000);
+    };
+
+    speedWindow.webContents.on("did-finish-load", async () => {
+      try {
+        await speedWindow.webContents.executeJavaScript(
+          `
+          (() => {
+            const clickAny = (selectors) => {
+              for (const sel of selectors) {
+                const el = document.querySelector(sel);
+                if (el) { el.click(); return true; }
+              }
+              return false;
+            };
+            clickAny(["#onetrust-accept-btn-handler", "button#accept-privacy", "button.accept"]);
+            clickAny([".start-text", ".start-button a", ".start-button", "[data-testid='start-button']"]);
+          })()
+        `,
+          true
+        );
+      } catch {
+        // ignore
+      }
+      pollResults();
+    });
+
+    speedWindow.loadURL("https://www.speedtest.net/");
+  });
 }
 
 ipcMain.handle("run-diagnostics", async (_event, options) => {

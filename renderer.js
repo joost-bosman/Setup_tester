@@ -24,7 +24,61 @@ function getSelectedValue(name) {
 }
 
 function formatForDisplay(obj) {
-  return JSON.stringify(obj, null, 2);
+  if (!obj) return "No diagnostics available.";
+  const formatValue = (value) => {
+    if (value === null || value === undefined || value === "") return "n/a";
+    if (Array.isArray(value)) return value.length ? value.join(", ") : "n/a";
+    return String(value);
+  };
+  const toMBps = (mbps) => {
+    const num = Number(mbps);
+    if (!Number.isFinite(num)) return "n/a";
+    return (num / 8).toFixed(2);
+  };
+
+  const ideCaps = Array.isArray(obj?.memory?.alternativeIdeCaps)
+    ? obj.memory.alternativeIdeCaps.map((entry) => `${entry.product}: ${entry.xmxMb} MB`)
+    : [];
+
+  const lines = [
+    "OS",
+    `- version: ${formatValue(obj?.os?.version)}`,
+    `- release: ${formatValue(obj?.os?.release)}`,
+    `- arch: ${formatValue(obj?.os?.arch)}`,
+    `- hostname: ${formatValue(obj?.os?.hostname)}`,
+    `- ip: ${formatValue(obj?.os?.ip)}`,
+    "",
+    "CPU (Processor)",
+    `- vendor: ${formatValue(obj?.cpu?.vendor)}`,
+    `- model: ${formatValue(obj?.cpu?.model)}`,
+    `- cores: ${formatValue(obj?.cpu?.cores)}`,
+    `- total speed: ${formatValue(obj?.cpu?.totalSpeedMHz)} MHz (${formatValue(obj?.cpu?.totalSpeedGHz)} GHz)`,
+    `- voltage: ${formatValue(obj?.cpu?.voltage)}`,
+    "",
+    "RAM Modules",
+    `- vendor: ${formatValue(obj?.memory?.moduleVendors)}`,
+    `- total: ${formatValue(obj?.memory?.total)}`,
+    `- used: ${formatValue(obj?.memory?.used)}`,
+    `- free: ${formatValue(obj?.memory?.free)}`,
+    `- IntelliJ cap: ${formatValue(obj?.memory?.intellijCapMb)} MB`,
+    `- Alt IDE caps: ${ideCaps.length ? ideCaps.join("; ") : "n/a"}`,
+    "",
+    "GPU (Videocard)",
+    `- vendor: ${formatValue(obj?.gpu?.vendor)}`,
+    `- chip: ${formatValue(obj?.gpu?.chip)}`,
+    `- cores: ${formatValue(obj?.gpu?.cores)}`,
+    `- speed: ${formatValue(obj?.gpu?.speedMHz)} MHz (${formatValue(obj?.gpu?.speedGHz)} GHz)`,
+    `- voltage: ${formatValue(obj?.gpu?.voltage)}`,
+    "",
+    "Internet",
+    `- test: ${formatValue(obj?.internet?.testUrl)}`,
+    `- download: ${toMBps(obj?.internet?.downloadMbps)} MB/s`,
+    `- upload: ${toMBps(obj?.internet?.uploadMbps)} MB/s`,
+    `- ping: ${formatValue(obj?.internet?.pingMs)} ms`,
+    `- status: ${formatValue(obj?.internet?.ok ? "ok" : obj?.internet?.error || "n/a")}`
+  ];
+
+  return lines.join("\n");
 }
 
 function getSuggestions(diag) {
@@ -63,6 +117,10 @@ function getSuggestions(diag) {
     suggestions.push("Run full diagnostics to include GPU and process details.");
   }
 
+  if (Number.isFinite(diag?.memory?.intellijCapMb) || (diag?.memory?.alternativeIdeCaps || []).length > 0) {
+    suggestions.push("JetBrains IDE cap detected: increase IDE heap size if performance is slow.");
+  }
+
   if (suggestions.length === 0) {
     suggestions.push("No immediate issues found. System looks healthy.");
   }
@@ -70,68 +128,23 @@ function getSuggestions(diag) {
   return suggestions;
 }
 
-function getIntelliJTips() {
-  return [
-    "Increase IDE heap size (Help > Change Memory Settings).",
-    "Disable unused plugins to reduce background work.",
-    "Exclude large build/output folders from indexing.",
-    "Enable Git file system monitor for faster status updates.",
-    "Use Gradle/Maven daemon and parallel build options.",
-    "Invalidate caches only when necessary (avoid frequent reindexing)."
-  ];
-}
-
-function buildMacSummary(diag) {
-  if (diag?.os?.platform !== "darwin") return [];
-  const update =
-    diag?.os?.updateStatus === "updates_available"
-      ? "updates available"
-      : diag?.os?.updateStatus === "up_to_date"
-        ? "up to date"
-        : "unknown";
-
-  const gpuName = diag?.gpu?.name || "n/a";
-  const gpuVendor = diag?.gpu?.vendorLink ? ` (${diag.gpu.vendorLink})` : "";
-
-  return [
-    `macOS update: ${update}`,
-    `OS version: ${diag?.os?.version || "n/a"} (${diag?.os?.release || "n/a"})`,
-    `CPU: ${diag?.cpu?.model || "n/a"}`,
-    `Memory: ${diag?.memory?.total || "n/a"}`,
-    `GPU: ${gpuName}${gpuVendor}`,
-    `App: ${diag?.app?.name || "n/a"} ${diag?.app?.version || ""}`.trim(),
-    `Electron: ${diag?.app?.electron || "n/a"} | Node: ${diag?.app?.node || "n/a"}`,
-    `Java home: ${diag?.app?.javaHome || "not set"}`
-  ];
-}
-
 function formatForText(obj) {
   const suggestions = getSuggestions(obj);
-  const macSummary = buildMacSummary(obj);
   return [
-    JSON.stringify(obj, null, 2),
-    ...(macSummary.length ? ["", "macOS summary:", ...macSummary.map((item) => `- ${item}`)] : []),
+    formatForDisplay(obj),
     "",
     "Suggestions:",
-    ...suggestions.map((item) => `- ${item}`),
-    "",
-    "IntelliJ tips:",
-    ...getIntelliJTips().map((item) => `- ${item}`)
+    ...suggestions.map((item) => `- ${item}`)
   ].join("\n");
 }
 
 function formatForPdf(obj) {
   const suggestions = getSuggestions(obj);
-  const macSummary = buildMacSummary(obj);
   return [
-    JSON.stringify(obj, null, 2),
-    ...(macSummary.length ? ["", "macOS summary:", ...macSummary.map((item) => `- ${item}`)] : []),
+    formatForDisplay(obj),
     "",
     "Suggestions:",
-    ...suggestions.map((item) => `- ${item}`),
-    "",
-    "IntelliJ tips:",
-    ...getIntelliJTips().map((item) => `- ${item}`)
+    ...suggestions.map((item) => `- ${item}`)
   ].join("\n");
 }
 
