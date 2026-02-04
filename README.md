@@ -19,14 +19,19 @@ Small Windows + macOS diagnostics app with privacy controls and export.
 - Internet check measures request latency to a public endpoint.
 
 ## Build
-- 
-pm run pack (folder build)
-- 
-pm run build (installer)
+- `npm run pack` (folder build)
+- `npm run build` (installer)
+- macOS helper: `./mac_diagtool_program_builder.sh`
 
+## Where the executables are
+- Build output goes to `dist/`.
+- Windows: `*.exe` (NSIS) in `dist/`.
+- macOS: `*.dmg` in `dist/`.
+- Note: macOS installers are best built on macOS, and need to be built by the user because I do not have a Mac.
+- The mac helper script generates `assets/icon-mac.icns` from `assets/icon-mac.png` before building.
 
-- Windows 98 icon source: http://toastytech.com/guis/win98.html
-
-
-- Apple image source: https://www.aicerts.ai/news/apple-ai-strategy-the-invisible-approach-wall-street-is-questioning/
+## Credits
+Source icons:
+- http://toastytech.com/guis/win98.html
+- https://www.aicerts.ai/news/apple-ai-strategy-the-invisible-approach-wall-street-is-questioning/
 

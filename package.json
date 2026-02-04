@@ -25,7 +25,7 @@
                   "productName":  "Local Resource Diagnostic Tool",
                   "mac":  {
                               "target":  "dmg",
-                              "icon":  "assets/icon-mac.png"
+                              "icon":  "assets/icon-mac.icns"
                           },
                   "win":  {
                               "target":  "nsis",

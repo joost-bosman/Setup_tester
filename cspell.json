@@ -1,0 +1,21 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "dist/**",
+    "node_modules/**",
+    "assets/**"
+  ],
+  "words": [
+    "diagtool",
+    "iconset",
+    "iconutil",
+    "joostbosman",
+    "localresourcediagnostictool",
+    "nsis",
+    "redactions"
+  ],
+  "ignoreWords": [
+    "ICONSET"
+  ]
+}
