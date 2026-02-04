@@ -1,0 +1,12 @@
+{
+  "name": "local_resource_diagnostic_tool",
+  "version": "0.1.0",
+  "description": "Local system diagnostics app (Windows + macOS) with privacy controls.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^28.3.3"
+  }
+}

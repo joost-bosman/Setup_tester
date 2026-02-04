@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Diagnostics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div>
+          <h1>Local Diagnostics</h1>
+          <p>Quick system snapshot with privacy controls.</p>
+        </div>
+        <div class="badge">Windows + macOS</div>
+      </header>
+
+      <section class="controls">
+        <div class="card">
+          <h2>Privacy</h2>
+          <label class="radio">
+            <input type="radio" name="privacy" value="private" checked />
+            <span>Private (show all info)</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="privacy" value="public" />
+            <span>Public (redact personal data)</span>
+          </label>
+        </div>
+        <div class="card">
+          <h2>Mode</h2>
+          <label class="radio">
+            <input type="radio" name="mode" value="quick" checked />
+            <span>Quick diagnostics</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="mode" value="full" />
+            <span>Full diagnostics</span>
+          </label>
+        </div>
+        <div class="card actions">
+          <button id="runBtn" class="primary">Run diagnostics</button>
+          <button id="exportBtn" class="secondary" disabled>Export results</button>
+          <div id="status" class="status">Ready.</div>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="results-header">
+          <h2>Results</h2>
+          <span id="timestamp"></span>
+        </div>
+        <pre id="results">Run diagnostics to see results.</pre>
+      </section>
+    </div>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Export results</h3>
+        <p>Choose a format:</p>
+        <div class="modal-actions">
+          <button id="exportTxt" class="secondary">TXT</button>
+          <button id="exportPdf" class="secondary">PDF</button>
+          <button id="cancelExport" class="ghost">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
