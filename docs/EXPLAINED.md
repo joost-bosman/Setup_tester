@@ -1,15 +1,15 @@
-# Multilingual Developer Diagnostics Tool - Explained
+﻿# Multilingual Developer Diagnostics Tool - Explained
 
 ## Table of Contents / Inhoudsopgave
 - English (UK)
 - Nederlands
-- à¤¹à¤¿à¤¨à¥à¤¦à¥€
-- Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©
+- हिन्दी
+- العربية
 - Polski
-- Ð£ÐºÑ€Ð°Ñ—Ð½ÑÑŒÐºÐ°
-- FranÃ§ais
-- PortuguÃªs
-- EspaÃ±ol
+- Українська
+- Français
+- Português
+- Español
 - Italiano
 - Bahasa Indonesia
 
@@ -80,12 +80,12 @@
 
 ### Wat de tool controleert
 - OS, CPU, RAM, GPU, internetsnelheid/latency
-- Optioneel: geÃ¯nstalleerde IDE's, tools en talen
+- Optioneel: geïnstalleerde IDE's, tools en talen
 - Optioneel: netwerkdetails en energieplan (uitgebreid)
 
 ### Suggestielogica
 - Kort: gericht op snel kunnen starten.
-- Uitgebreid: gericht op maximale prestaties en efficiÃ«ntie.
+- Uitgebreid: gericht op maximale prestaties en efficiëntie.
 
 ### Export
 - TXT en PDF bevatten resultaten + suggesties.
@@ -103,81 +103,81 @@
 
 ---
 
-## à¤¹à¤¿à¤¨à¥à¤¦à¥€
+## हिन्दी
 
-### à¤¤à¥à¤µà¤°à¤¿à¤¤ à¤¶à¥à¤°à¥à¤†à¤¤ (à¤¸à¥à¤Ÿà¥‡à¤ª-à¤¬à¤¾à¤¯-à¤¸à¥à¤Ÿà¥‡à¤ª)
-1. à¤ªà¤¹à¤²à¥‡ à¤¸à¥à¤•à¥à¤°à¥€à¤¨ à¤ªà¤° à¤­à¤¾à¤·à¤¾ à¤šà¥à¤¨à¥‡à¤‚à¥¤
-2. **à¤¸à¤‚à¤•à¥à¤·à¤¿à¤ªà¥à¤¤** à¤¤à¥à¤µà¤°à¤¿à¤¤ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¥‡ à¤²à¤¿à¤, **à¤µà¤¿à¤¸à¥à¤¤à¥ƒà¤¤** à¤…à¤§à¤¿à¤•à¤¤à¤® à¤ªà¥à¤°à¤¦à¤°à¥à¤¶à¤¨ à¤•à¥‡ à¤²à¤¿à¤ à¤šà¥à¤¨à¥‡à¤‚à¥¤
-3. (à¤µà¥ˆà¤•à¤²à¥à¤ªà¤¿à¤•) **Software/IDE** à¤”à¤° **Tools & Languages** à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¤•à¥à¤·à¤® à¤•à¤°à¥‡à¤‚à¥¤
-4. **à¤¡à¤¾à¤¯à¤—à¥à¤¨à¥‹à¤¸à¥à¤Ÿà¤¿à¤•à¥à¤¸ à¤šà¤²à¤¾à¤à¤** à¤ªà¤° à¤•à¥à¤²à¤¿à¤• à¤•à¤°à¥‡à¤‚à¥¤
-5. **à¤‘à¤ªà¥à¤Ÿà¤¿à¤®à¤¾à¤‡à¤œà¥‡à¤¶à¤¨ à¤¸à¥à¤à¤¾à¤µ** à¤¦à¥‡à¤–à¥‡à¤‚ à¤”à¤° à¤œà¤°à¥‚à¤°à¤¤ à¤¹à¥‹ à¤¤à¥‹ TXT/PDF à¤à¤•à¥à¤¸à¤ªà¥‹à¤°à¥à¤Ÿ à¤•à¤°à¥‡à¤‚à¥¤
+### त्वरित शुरुआत (स्टेप-बाय-स्टेप)
+1. पहले स्क्रीन पर भाषा चुनें।
+2. **संक्षिप्त** त्वरित उपयोग के लिए, **विस्तृत** अधिकतम प्रदर्शन के लिए चुनें।
+3. (वैकल्पिक) **Software/IDE** और **Tools & Languages** स्कैन के लिए सक्षम करें।
+4. **डायग्नोस्टिक्स चलाएँ** पर क्लिक करें।
+5. **ऑप्टिमाइजेशन सुझाव** देखें और जरूरत हो तो TXT/PDF एक्सपोर्ट करें।
 
-### à¤«à¥à¤²à¥‹ (à¤µà¤¿à¤œà¤¼à¥à¤…à¤²)
+### फ्लो (विज़ुअल)
 ```
-[à¤­à¤¾à¤·à¤¾] -> [à¤®à¥‹à¤¡ + à¤à¤•à¥à¤¸à¥à¤Ÿà¥à¤°à¤¾] -> [à¤¡à¤¾à¤¯à¤—à¥à¤¨à¥‹à¤¸à¥à¤Ÿà¤¿à¤•à¥à¤¸] -> [à¤ªà¤°à¤¿à¤£à¤¾à¤® + à¤¸à¥à¤à¤¾à¤µ] -> [à¤à¤•à¥à¤¸à¤ªà¥‹à¤°à¥à¤Ÿ]
+[भाषा] -> [मोड + एक्स्ट्रा] -> [डायग्नोस्टिक्स] -> [परिणाम + सुझाव] -> [एक्सपोर्ट]
 ```
 
-### à¤Ÿà¥‚à¤² à¤•à¥à¤¯à¤¾ à¤œà¤¾à¤à¤šà¤¤à¤¾ à¤¹à¥ˆ
-- OS, CPU, RAM, GPU, à¤‡à¤‚à¤Ÿà¤°à¤¨à¥‡à¤Ÿ à¤¸à¥à¤ªà¥€à¤¡/à¤²à¥‡à¤Ÿà¥‡à¤‚à¤¸à¥€
-- à¤µà¥ˆà¤•à¤²à¥à¤ªà¤¿à¤•: IDEs, à¤Ÿà¥‚à¤²à¥à¤¸, à¤­à¤¾à¤·à¤¾à¤à¤
-- à¤µà¥ˆà¤•à¤²à¥à¤ªà¤¿à¤•: à¤¨à¥‡à¤Ÿà¤µà¤°à¥à¤•/à¤ªà¤¾à¤µà¤° à¤ªà¥à¤²à¤¾à¤¨ (à¤µà¤¿à¤¸à¥à¤¤à¥ƒà¤¤)
+### टूल क्या जाँचता है
+- OS, CPU, RAM, GPU, इंटरनेट स्पीड/लेटेंसी
+- वैकल्पिक: IDEs, टूल्स, भाषाएँ
+- वैकल्पिक: नेटवर्क/पावर प्लान (विस्तृत)
 
-### à¤¸à¥à¤à¤¾à¤µ à¤²à¥‰à¤œà¤¿à¤•
-- à¤¸à¤‚à¤•à¥à¤·à¤¿à¤ªà¥à¤¤: à¤•à¤¾à¤® à¤¶à¥à¤°à¥‚ à¤•à¤°à¤¨à¥‡ à¤ªà¤° à¤«à¥‹à¤•à¤¸à¥¤
-- à¤µà¤¿à¤¸à¥à¤¤à¥ƒà¤¤: à¤…à¤§à¤¿à¤•à¤¤à¤® à¤ªà¥à¤°à¤¦à¤°à¥à¤¶à¤¨/à¤¦à¤•à¥à¤·à¤¤à¤¾ à¤ªà¤° à¤«à¥‹à¤•à¤¸à¥¤
+### सुझाव लॉजिक
+- संक्षिप्त: काम शुरू करने पर फोकस।
+- विस्तृत: अधिकतम प्रदर्शन/दक्षता पर फोकस।
 
-### à¤à¤•à¥à¤¸à¤ªà¥‹à¤°à¥à¤Ÿ
-- TXT/PDF à¤®à¥‡à¤‚ à¤ªà¤°à¤¿à¤£à¤¾à¤® + à¤¸à¥à¤à¤¾à¤µ à¤¶à¤¾à¤®à¤¿à¤² à¤¹à¥‹à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤
+### एक्सपोर्ट
+- TXT/PDF में परिणाम + सुझाव शामिल होते हैं।
 
-### à¤ªà¥à¤°à¤¾à¤‡à¤µà¥‡à¤¸à¥€
-- à¤¡à¤¾à¤¯à¤—à¥à¤¨à¥‹à¤¸à¥à¤Ÿà¤¿à¤•à¥à¤¸ à¤¸à¥à¤¥à¤¾à¤¨à¥€à¤¯ à¤¹à¥ˆà¤‚à¥¤
-- à¤­à¤¾à¤·à¤¾ à¤ªà¤¹à¤šà¤¾à¤¨ IP à¤¸à¥‡ à¤¦à¥‡à¤¶ à¤…à¤¨à¥à¤®à¤¾à¤¨ à¤•à¤°à¤¤à¥€ à¤¹à¥ˆ; à¤¡à¥‡à¤Ÿà¤¾ à¤¸à¥à¤Ÿà¥‹à¤° à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹à¤¤à¤¾à¥¤
+### प्राइवेसी
+- डायग्नोस्टिक्स स्थानीय हैं।
+- भाषा पहचान IP से देश अनुमान करती है; डेटा स्टोर नहीं होता।
 
-### à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤‘à¤ªà¥à¤Ÿà¤¿à¤®à¤¾à¤‡à¤œà¤¼à¥‡à¤¶à¤¨ à¤Ÿà¤¿à¤ªà¥à¤¸
-- à¤¸à¥à¤ªà¤·à¥à¤Ÿ à¤šà¥‡à¤‚à¤œà¤²à¥‰à¤— à¤”à¤° à¤¸à¥à¤•à¥à¤°à¥€à¤¨à¤¶à¥‰à¤Ÿà¥¤
-- à¤›à¥‹à¤Ÿà¥‡ à¤”à¤° à¤¸à¤¾à¤‡à¤¨ à¤•à¤¿à¤ à¤¹à¥à¤ à¤‡à¤‚à¤¸à¥à¤Ÿà¥‰à¤²à¤°à¥¤
-- README à¤®à¥‡à¤‚ à¤›à¥‹à¤Ÿà¤¾ "à¤ªà¤¹à¤²à¥€ à¤¬à¤¾à¤° à¤‰à¤ªà¤¯à¥‹à¤—" à¤—à¤¾à¤‡à¤¡à¥¤
-- à¤¸à¤‚à¤­à¤µ à¤¹à¥‹ à¤¤à¥‹ portable + installer à¤µà¤¿à¤•à¤²à¥à¤ªà¥¤
-- integrity à¤•à¥‡ à¤²à¤¿à¤ hash à¤ªà¥à¤°à¤•à¤¾à¤¶à¤¿à¤¤ à¤•à¤°à¥‡à¤‚à¥¤
+### डाउनलोड ऑप्टिमाइज़ेशन टिप्स
+- स्पष्ट चेंजलॉग और स्क्रीनशॉट।
+- छोटे और साइन किए हुए इंस्टॉलर।
+- README में छोटा "पहली बार उपयोग" गाइड।
+- संभव हो तो portable + installer विकल्प।
+- integrity के लिए hash प्रकाशित करें।
 
 ---
 
-## Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©
+## العربية
 
-### Ø¨Ø¯Ø¡ Ø³Ø±ÙŠØ¹ (Ø®Ø·ÙˆØ© Ø¨Ø®Ø·ÙˆØ©)
-1. Ø§Ø®ØªØ± Ø§Ù„Ù„ØºØ© ÙÙŠ Ø§Ù„Ø´Ø§Ø´Ø© Ø§Ù„Ø£ÙˆÙ„Ù‰.
-2. Ø§Ø®ØªØ± **Ù…Ø®ØªØµØ±** Ù„Ù„Ø¬Ø§Ù‡Ø²ÙŠØ© Ø§Ù„Ø³Ø±ÙŠØ¹Ø© Ø£Ùˆ **Ù…ÙˆØ³Ø¹** Ù„Ø£Ù‚ØµÙ‰ Ø£Ø¯Ø§Ø¡.
-3. (Ø§Ø®ØªÙŠØ§Ø±ÙŠ) ÙØ¹Ù‘Ù„ **Ø§Ù„Ø¨Ø±Ø§Ù…Ø¬/IDE** Ùˆ **Ø§Ù„Ø£Ø¯ÙˆØ§Øª ÙˆØ§Ù„Ù„ØºØ§Øª**.
-4. Ø§Ø¶ØºØ· **ØªØ´ØºÙŠÙ„ Ø§Ù„ØªØ´Ø®ÙŠØµ** ÙˆØ§Ù†ØªØ¸Ø± Ø§Ù„Ù†ØªØ§Ø¦Ø¬.
-5. Ø±Ø§Ø¬Ø¹ **Ø§Ù‚ØªØ±Ø§Ø­Ø§Øª Ø§Ù„ØªØ­Ø³ÙŠÙ†** ÙˆØµØ¯Ù‘Ø± Ø¥Ù„Ù‰ TXT/PDF Ø¹Ù†Ø¯ Ø§Ù„Ø­Ø§Ø¬Ø©.
+### بدء سريع (خطوة بخطوة)
+1. اختر اللغة في الشاشة الأولى.
+2. اختر **مختصر** للجاهزية السريعة أو **موسع** لأقصى أداء.
+3. (اختياري) فعّل **البرامج/IDE** و **الأدوات واللغات**.
+4. اضغط **تشغيل التشخيص** وانتظر النتائج.
+5. راجع **اقتراحات التحسين** وصدّر إلى TXT/PDF عند الحاجة.
 
-### Ø§Ù„ØªØ¯ÙÙ‚ (Ù…Ø±Ø¦ÙŠ)
+### التدفق (مرئي)
 ```
-[Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù„ØºØ©] -> [Ø§Ù„ÙˆØ¶Ø¹ + Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª] -> [Ø§Ù„ØªØ´Ø®ÙŠØµ] -> [Ø§Ù„Ù†ØªØ§Ø¦Ø¬ + Ø§Ù„Ø§Ù‚ØªØ±Ø§Ø­Ø§Øª] -> [Ø§Ù„ØªØµØ¯ÙŠØ±]
+[اختيار اللغة] -> [الوضع + الإضافات] -> [التشخيص] -> [النتائج + الاقتراحات] -> [التصدير]
 ```
 
-### Ù…Ø§ Ø§Ù„Ø°ÙŠ ÙŠÙØ­ØµÙ‡ Ø§Ù„Ø£Ø¯Ø§Øª
-- OS, CPU, RAM, GPU, Ø³Ø±Ø¹Ø© Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª/Ø§Ù„ÙƒÙ…ÙˆÙ†
-- Ø§Ø®ØªÙŠØ§Ø±ÙŠ: IDEs ÙˆØ§Ù„Ø£Ø¯ÙˆØ§Øª ÙˆØ§Ù„Ù„ØºØ§Øª
-- Ø§Ø®ØªÙŠØ§Ø±ÙŠ: ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø´Ø¨ÙƒØ© ÙˆØ®Ø·Ø© Ø§Ù„Ø·Ø§Ù‚Ø© (Ù…ÙˆØ³Ø¹)
+### ما الذي يفحصه الأدات
+- OS, CPU, RAM, GPU, سرعة الإنترنت/الكمون
+- اختياري: IDEs والأدوات واللغات
+- اختياري: تفاصيل الشبكة وخطة الطاقة (موسع)
 
-### Ù…Ù†Ø·Ù‚ Ø§Ù„Ø§Ù‚ØªØ±Ø§Ø­Ø§Øª
-- Ù…Ø®ØªØµØ±: Ø¬Ø§Ù‡Ø²ÙŠØ© Ø§Ù„Ø¨Ø¯Ø¡ Ø¨Ø§Ù„Ø¹Ù…Ù„.
-- Ù…ÙˆØ³Ø¹: Ø£Ø¯Ø§Ø¡ ÙˆÙƒÙØ§Ø¡Ø© Ù‚ØµÙˆÙ‰.
+### منطق الاقتراحات
+- مختصر: جاهزية البدء بالعمل.
+- موسع: أداء وكفاءة قصوى.
 
-### Ø§Ù„ØªØµØ¯ÙŠØ±
-- TXT/PDF ÙŠØªØ¶Ù…Ù†Ø§Ù† Ø§Ù„Ù†ØªØ§Ø¦Ø¬ ÙˆØ§Ù„Ø§Ù‚ØªØ±Ø§Ø­Ø§Øª.
+### التصدير
+- TXT/PDF يتضمنان النتائج والاقتراحات.
 
-### Ø§Ù„Ø®ØµÙˆØµÙŠØ©
-- Ø§Ù„ØªØ´Ø®ÙŠØµ Ù…Ø­Ù„ÙŠ.
-- ÙƒØ´Ù Ø§Ù„Ù„ØºØ© ÙŠØ¹ØªÙ…Ø¯ Ø¹Ù„Ù‰ IP Ù„ØªØ­Ø¯ÙŠØ¯ Ø§Ù„Ø¯ÙˆÙ„Ø©Ø› Ù„Ø§ ÙŠØªÙ… Ø§Ù„ØªØ®Ø²ÙŠÙ†.
+### الخصوصية
+- التشخيص محلي.
+- كشف اللغة يعتمد على IP لتحديد الدولة؛ لا يتم التخزين.
 
-### Ù†ØµØ§Ø¦Ø­ ØªØ­Ø³ÙŠÙ† Ø§Ù„ØªØ­Ù…ÙŠÙ„
-- Ø³Ø¬Ù„ ØªØºÙŠÙŠØ±Ø§Øª ÙˆØ§Ø¶Ø­ ÙˆÙ„Ù‚Ø·Ø§Øª Ø´Ø§Ø´Ø©.
-- Ù…Ø«Ø¨ØªØ§Øª ØµØºÙŠØ±Ø© ÙˆÙ…ÙˆÙ‚Ø¹Ø©.
-- Ø¯Ù„ÙŠÙ„ "Ø£ÙˆÙ„ Ø§Ø³ØªØ®Ø¯Ø§Ù…" Ù‚ØµÙŠØ± ÙÙŠ README.
-- Ø®ÙŠØ§Ø±Ø§Øª portable Ùˆ installer Ø¥Ù† Ø£Ù…ÙƒÙ†.
-- Ù†Ø´Ø± hashes Ù„Ù„ØªØ­Ù‚Ù‚.
+### نصائح تحسين التحميل
+- سجل تغييرات واضح ولقطات شاشة.
+- مثبتات صغيرة وموقعة.
+- دليل "أول استخدام" قصير في README.
+- خيارات portable و installer إن أمكن.
+- نشر hashes للتحقق.
 
 ---
 
@@ -220,96 +220,96 @@
 
 ---
 
-## Ð£ÐºÑ€Ð°Ñ—Ð½ÑÑŒÐºÐ°
+## Українська
 
-### Ð¨Ð²Ð¸Ð´ÐºÐ¸Ð¹ ÑÑ‚Ð°Ñ€Ñ‚ (ÐºÑ€Ð¾Ðº Ð·Ð° ÐºÑ€Ð¾ÐºÐ¾Ð¼)
-1. ÐžÐ±ÐµÑ€Ñ–Ñ‚ÑŒ Ð¼Ð¾Ð²Ñƒ Ð½Ð° Ð¿ÐµÑ€ÑˆÐ¾Ð¼Ñƒ ÐµÐºÑ€Ð°Ð½Ñ–.
-2. ÐžÐ±ÐµÑ€Ñ–Ñ‚ÑŒ **ÐšÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹** Ð´Ð»Ñ ÑˆÐ²Ð¸Ð´ÐºÐ¾Ñ— Ð³Ð¾Ñ‚Ð¾Ð²Ð½Ð¾ÑÑ‚Ñ– Ð°Ð±Ð¾ **Ð Ð¾Ð·ÑˆÐ¸Ñ€ÐµÐ½Ð¸Ð¹** Ð´Ð»Ñ Ð¼Ð°ÐºÑÐ¸Ð¼ÑƒÐ¼Ñƒ.
-3. (ÐžÐ¿Ñ†Ñ–Ð¹Ð½Ð¾) Ð£Ð²Ñ–Ð¼ÐºÐ½Ñ–Ñ‚ÑŒ **ÐŸÐ—/IDE** Ñ– **Ð†Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ð¸ Ð¹ Ð¼Ð¾Ð²Ð¸**.
-4. ÐÐ°Ñ‚Ð¸ÑÐ½Ñ–Ñ‚ÑŒ **Ð—Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚Ð¸ Ð´Ñ–Ð°Ð³Ð½Ð¾ÑÑ‚Ð¸ÐºÑƒ**.
-5. ÐŸÐµÑ€ÐµÐ³Ð»ÑÐ½ÑŒÑ‚Ðµ **ÐŸÑ€Ð¾Ð¿Ð¾Ð·Ð¸Ñ†Ñ–Ñ— Ð¾Ð¿Ñ‚Ð¸Ð¼Ñ–Ð·Ð°Ñ†Ñ–Ñ—** Ñ– ÐµÐºÑÐ¿Ð¾Ñ€Ñ‚ÑƒÐ¹Ñ‚Ðµ TXT/PDF.
+### Швидкий старт (крок за кроком)
+1. Оберіть мову на першому екрані.
+2. Оберіть **Короткий** для швидкої готовності або **Розширений** для максимуму.
+3. (Опційно) Увімкніть **ПЗ/IDE** і **Інструменти й мови**.
+4. Натисніть **Запустити діагностику**.
+5. Перегляньте **Пропозиції оптимізації** і експортуйте TXT/PDF.
 
-### ÐŸÐ¾Ñ‚Ñ–Ðº (Ð²Ñ–Ð·ÑƒÐ°Ð»ÑŒÐ½Ð¾)
+### Потік (візуально)
 ```
-[ÐœÐ¾Ð²Ð°] -> [Ð ÐµÐ¶Ð¸Ð¼ + Ð”Ð¾Ð´Ð°Ñ‚ÐºÐ¾Ð²Ð¾] -> [Ð”Ñ–Ð°Ð³Ð½Ð¾ÑÑ‚Ð¸ÐºÐ°] -> [Ð ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ + ÐŸÑ€Ð¾Ð¿Ð¾Ð·Ð¸Ñ†Ñ–Ñ—] -> [Ð•ÐºÑÐ¿Ð¾Ñ€Ñ‚]
+[Мова] -> [Режим + Додатково] -> [Діагностика] -> [Результати + Пропозиції] -> [Експорт]
 ```
 
-### Ð©Ð¾ Ð¿ÐµÑ€ÐµÐ²Ñ–Ñ€ÑÑ” Ñ–Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚
-- OS, CPU, RAM, GPU, Ñ–Ð½Ñ‚ÐµÑ€Ð½ÐµÑ‚
-- ÐžÐ¿Ñ†Ñ–Ð¹Ð½Ð¾: IDE, Ñ–Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ð¸, Ð¼Ð¾Ð²Ð¸
-- ÐžÐ¿Ñ†Ñ–Ð¹Ð½Ð¾: Ð¼ÐµÑ€ÐµÐ¶Ð° Ñ‚Ð° Ð¿Ð»Ð°Ð½ Ð¶Ð¸Ð²Ð»ÐµÐ½Ð½Ñ (Ñ€Ð¾Ð·ÑˆÐ¸Ñ€ÐµÐ½Ð¸Ð¹)
+### Що перевіряє інструмент
+- OS, CPU, RAM, GPU, інтернет
+- Опційно: IDE, інструменти, мови
+- Опційно: мережа та план живлення (розширений)
 
-### Ð›Ð¾Ð³Ñ–ÐºÐ° Ð¿Ñ€Ð¾Ð¿Ð¾Ð·Ð¸Ñ†Ñ–Ð¹
-- ÐšÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹: Ð³Ð¾Ñ‚Ð¾Ð²Ð½Ñ–ÑÑ‚ÑŒ Ð´Ð¾ ÑÑ‚Ð°Ñ€Ñ‚Ñƒ.
-- Ð Ð¾Ð·ÑˆÐ¸Ñ€ÐµÐ½Ð¸Ð¹: Ð¼Ð°ÐºÑÐ¸Ð¼ÑƒÐ¼ Ð¿Ñ€Ð¾Ð´ÑƒÐºÑ‚Ð¸Ð²Ð½Ð¾ÑÑ‚Ñ–.
+### Логіка пропозицій
+- Короткий: готовність до старту.
+- Розширений: максимум продуктивності.
 
-### Ð•ÐºÑÐ¿Ð¾Ñ€Ñ‚
-- TXT/PDF Ð¼Ñ–ÑÑ‚ÑÑ‚ÑŒ Ñ€ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚Ð¸ + Ð¿Ñ€Ð¾Ð¿Ð¾Ð·Ð¸Ñ†Ñ–Ñ—.
+### Експорт
+- TXT/PDF містять результати + пропозиції.
 
-### ÐŸÑ€Ð¸Ð²Ð°Ñ‚Ð½Ñ–ÑÑ‚ÑŒ
-- Ð”Ñ–Ð°Ð³Ð½Ð¾ÑÑ‚Ð¸ÐºÐ° Ð»Ð¾ÐºÐ°Ð»ÑŒÐ½Ð°.
-- ÐÐ²Ñ‚Ð¾Ð²Ð¸Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ Ð¼Ð¾Ð²Ð¸ Ð²Ð¸ÐºÐ¾Ñ€Ð¸ÑÑ‚Ð¾Ð²ÑƒÑ” IP; Ð½Ñ–Ñ‡Ð¾Ð³Ð¾ Ð½Ðµ Ð·Ð±ÐµÑ€Ñ–Ð³Ð°Ñ”Ñ‚ÑŒÑÑ.
+### Приватність
+- Діагностика локальна.
+- Автовизначення мови використовує IP; нічого не зберігається.
 
-### ÐŸÐ¾Ñ€Ð°Ð´Ð¸ Ð´Ð»Ñ Ð·Ð°Ð²Ð°Ð½Ñ‚Ð°Ð¶ÐµÐ½Ð½Ñ
-- Ð§Ñ–Ñ‚ÐºÐ¸Ð¹ changelog Ñ– ÑÐºÑ€Ñ–Ð½ÑˆÐ¾Ñ‚Ð¸.
-- ÐÐµÐ²ÐµÐ»Ð¸ÐºÑ–, Ð¿Ñ–Ð´Ð¿Ð¸ÑÐ°Ð½Ñ– Ñ–Ð½ÑÑ‚Ð°Ð»ÑÑ‚Ð¾Ñ€Ð¸.
-- ÐšÐ¾Ñ€Ð¾Ñ‚ÐºÐ¸Ð¹ Ð³Ð°Ð¹Ð´ "Ð¿ÐµÑ€ÑˆÐ¸Ð¹ Ð·Ð°Ð¿ÑƒÑÐº".
-- Ð’Ð°Ñ€Ñ–Ð°Ð½Ñ‚Ð¸ portable + installer.
-- ÐŸÑƒÐ±Ð»Ñ–ÐºÑƒÐ¹Ñ‚Ðµ Ñ…ÐµÑˆÑ–.
+### Поради для завантаження
+- Чіткий changelog і скріншоти.
+- Невеликі, підписані інсталятори.
+- Короткий гайд "перший запуск".
+- Варіанти portable + installer.
+- Публікуйте хеші.
 
 ---
 
-## FranÃ§ais
+## Français
 
-### DÃ©marrage rapide (Ã©tape par Ã©tape)
-1. Choisissez la langue au premier Ã©cran.
-2. **Bref** pour dÃ©marrer vite, **Approfondi** pour le maximum.
+### Démarrage rapide (étape par étape)
+1. Choisissez la langue au premier écran.
+2. **Bref** pour démarrer vite, **Approfondi** pour le maximum.
 3. (Optionnel) Activez **Logiciels/IDE** et **Outils & langages**.
 4. Cliquez **Lancer le diagnostic**.
 5. Consultez **Suggestions d'optimisation** et exportez TXT/PDF.
 
 ### Flux (visuel)
 ```
-[Langue] -> [Mode + Extras] -> [Diagnostic] -> [RÃ©sultats + Suggestions] -> [Export]
+[Langue] -> [Mode + Extras] -> [Diagnostic] -> [Résultats + Suggestions] -> [Export]
 ```
 
-### Ce que l'outil vÃ©rifie
+### Ce que l'outil vérifie
 - OS, CPU, RAM, GPU, internet
 - Optionnel: IDE, outils, langages
-- Optionnel: rÃ©seau et plan d'alimentation (approfondi)
+- Optionnel: réseau et plan d'alimentation (approfondi)
 
 ### Logique des suggestions
-- Bref: prÃªt Ã  travailler.
-- Approfondi: performance et efficacitÃ© max.
+- Bref: prêt à travailler.
+- Approfondi: performance et efficacité max.
 
 ### Export
-- TXT/PDF incluent rÃ©sultats + suggestions.
+- TXT/PDF incluent résultats + suggestions.
 
-### ConfidentialitÃ©
+### Confidentialité
 - Diagnostics locaux.
-- DÃ©tection de langue via IP; rien n'est stockÃ©.
+- Détection de langue via IP; rien n'est stocké.
 
-### Conseils de tÃ©lÃ©chargement
+### Conseils de téléchargement
 - Changelog clair et captures.
-- Installers compacts et signÃ©s.
+- Installers compacts et signés.
 - Mini guide "premier lancement".
 - Portable + installer si possible.
 - Publier des hashes.
 
 ---
 
-## PortuguÃªs
+## Português
 
-### InÃ­cio rÃ¡pido (passo a passo)
-1. Escolha o idioma no primeiro ecrÃ£.
-2. **Breve** para rapidez, **Extenso** para mÃ¡ximo desempenho.
+### Início rápido (passo a passo)
+1. Escolha o idioma no primeiro ecrã.
+2. **Breve** para rapidez, **Extenso** para máximo desempenho.
 3. (Opcional) Ative **Software/IDEs** e **Ferramentas e linguagens**.
-4. Clique **Executar diagnÃ³stico**.
-5. Veja **SugestÃµes de otimizaÃ§Ã£o** e exporte TXT/PDF.
+4. Clique **Executar diagnóstico**.
+5. Veja **Sugestões de otimização** e exporte TXT/PDF.
 
 ### Fluxo (visual)
 ```
-[Idioma] -> [Modo + Extras] -> [DiagnÃ³stico] -> [Resultados + SugestÃµes] -> [ExportaÃ§Ã£o]
+[Idioma] -> [Modo + Extras] -> [Diagnóstico] -> [Resultados + Sugestões] -> [Exportação]
 ```
 
 ### O que a ferramenta verifica
@@ -317,60 +317,60 @@
 - Opcional: IDEs, ferramentas, linguagens
 - Opcional: rede e plano de energia (extenso)
 
-### LÃ³gica das sugestÃµes
+### Lógica das sugestões
 - Breve: pronto a trabalhar.
-- Extenso: performance mÃ¡xima.
+- Extenso: performance máxima.
 
 ### Exportar
-- TXT/PDF incluem resultados + sugestÃµes.
+- TXT/PDF incluem resultados + sugestões.
 
 ### Privacidade
-- DiagnÃ³stico local.
-- DeteÃ§Ã£o de idioma via IP; nada Ã© guardado.
+- Diagnóstico local.
+- Deteção de idioma via IP; nada é guardado.
 
 ### Dicas de download
 - Changelog claro e screenshots.
 - Instaladores pequenos e assinados.
-- Guia curto "primeira execuÃ§Ã£o".
-- OpÃ§Ãµes portable + installer.
+- Guia curto "primeira execução".
+- Opções portable + installer.
 - Publicar hashes.
 
 ---
 
-## EspaÃ±ol
+## Español
 
-### Inicio rÃ¡pido (paso a paso)
+### Inicio rápido (paso a paso)
 1. Elige el idioma en la primera pantalla.
-2. **Breve** para empezar rÃ¡pido, **Extenso** para mÃ¡ximo rendimiento.
+2. **Breve** para empezar rápido, **Extenso** para máximo rendimiento.
 3. (Opcional) Activa **Software/IDEs** y **Herramientas e idiomas**.
-4. Haz clic en **Ejecutar diagnÃ³stico**.
-5. Revisa **Sugerencias de optimizaciÃ³n** y exporta TXT/PDF.
+4. Haz clic en **Ejecutar diagnóstico**.
+5. Revisa **Sugerencias de optimización** y exporta TXT/PDF.
 
 ### Flujo (visual)
 ```
-[Idioma] -> [Modo + Extras] -> [DiagnÃ³stico] -> [Resultados + Sugerencias] -> [Exportar]
+[Idioma] -> [Modo + Extras] -> [Diagnóstico] -> [Resultados + Sugerencias] -> [Exportar]
 ```
 
-### QuÃ© comprueba la herramienta
+### Qué comprueba la herramienta
 - OS, CPU, RAM, GPU, internet
 - Opcional: IDEs, herramientas, idiomas
-- Opcional: red y plan de energÃ­a (extenso)
+- Opcional: red y plan de energía (extenso)
 
-### LÃ³gica de sugerencias
+### Lógica de sugerencias
 - Breve: listo para trabajar.
-- Extenso: mÃ¡ximo rendimiento.
+- Extenso: máximo rendimiento.
 
 ### Exportar
 - TXT/PDF incluyen resultados + sugerencias.
 
 ### Privacidad
-- DiagnÃ³sticos locales.
-- DetecciÃ³n de idioma vÃ­a IP; no se guarda nada.
+- Diagnósticos locales.
+- Detección de idioma vía IP; no se guarda nada.
 
 ### Consejos de descarga
 - Changelog claro y capturas.
-- Instaladores pequeÃ±os y firmados.
-- GuÃ­a breve de "primer uso".
+- Instaladores pequeños y firmados.
+- Guía breve de "primer uso".
 - Opciones portable + installer.
 - Publicar hashes.
 
@@ -387,7 +387,7 @@
 
 ### Flusso (visivo)
 ```
-[Lingua] -> [ModalitÃ  + Extra] -> [Diagnostica] -> [Risultati + Suggerimenti] -> [Export]
+[Lingua] -> [Modalità + Extra] -> [Diagnostica] -> [Risultati + Suggerimenti] -> [Export]
 ```
 
 ### Cosa controlla lo strumento
@@ -451,5 +451,6 @@
 - Panduan "first run" singkat.
 - Opsi portable + installer.
 - Publikasikan hash.
+
 
 

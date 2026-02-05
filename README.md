@@ -2,13 +2,16 @@
 
 ![Build](https://img.shields.io/github/actions/workflow/status/joost-bosman/Multilingual_Developer_Diagnostics_Tool/build-release.yml?label=build)
 
-Multilingual Developer Diagnostics Tool for Windows and macOS.
+Know your setup. Fix the gaps. Feel the 'yes! yes!' when you code, for Windows and macOS.
 
 This is the tool you reach for when you want to feel confident about the current state of your setup. Run it and you will see what is strong, what is missing, and what is holding you back across hardware, software, IDE, language(s), and Wi-Fi/LAN. Then comes the best part: it turns that insight into clear, practical suggestions, plus an exportable checklist so you can improve step by step.
 
-Main goal: maximize your current setup and create that smooth, fast, "yes! yes!" feeling when you start coding and developing.
+Main goal: get the most from your setup and feel that smooth, fast "yes! yes!" energy as you start coding and developing.
 
 Good luck! Cheers!
+
+## Why this exists
+At a certain point, you want to know the real state of your setup, what is missing, and how to make it faster, smoother, and more efficient. This tool makes that clear and gives you a path to fix it.
 
 ## Download
 - Latest releases: https://github.com/joost-bosman/Multilingual_Developer_Diagnostics_Tool/releases
@@ -39,6 +42,7 @@ Good luck! Cheers!
   - Software checks run only when you opt in.
 - Multilingual by default.
   - Choose a language on first launch.
+  - Supports 49 languages.
   - Auto-detect by region with English (UK) fallback.
 - Results you can act on.
   - Brief mode: a fast overview plus focused fixes for weak spots and missing dependencies.
@@ -71,6 +75,29 @@ macOS helper:
 - Windows installer: `*.exe` (NSIS)
 - macOS installer: `*.dmg`
 The mac helper script generates `assets/icon-mac.icns` from `assets/icon-mac.png` before building.
+
+## Trust and quality
+- CI build status is visible via the badge at the top of this README.
+- Each release includes a clear change summary.
+- See `TEST_REPORT.md` for recent test runs.
+
+## Manual step
+- Add GitHub Topics in repo settings (e.g., diagnostics, electron, windows, macos, developer-tools).
+
+## Contributing
+See `CONTRIBUTING.md`.
+
+## Code of conduct
+See `CODE_OF_CONDUCT.md`.
+
+## Security
+See `SECURITY.md`.
+
+## Roadmap
+See `docs/ROADMAP.md`.
+
+## Keywords
+See `docs/KEYWORDS.md`.
 
 ## Credits
 See `CREDITS.md`.
