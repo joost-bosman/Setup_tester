@@ -13,12 +13,11 @@ if (platform === "win32") {
   outputDir = "dist/macos";
 }
 
-const binName = platform === "win32" ? "electron-builder.cmd" : "electron-builder";
-const binPath = path.join(__dirname, "..", "node_modules", ".bin", binName);
-const args = [binPath];
+const cliPath = require.resolve("electron-builder/cli.js");
+const args = [cliPath];
 if (target) args.push(target);
 args.push(`--config.directories.output=${outputDir}`);
 
-const child = spawn(args[0], args.slice(1), { stdio: "inherit" });
+const child = spawn(process.execPath, args, { stdio: "inherit" });
 child.on("exit", (code) => process.exit(code ?? 1));
 child.on("error", () => process.exit(1));
