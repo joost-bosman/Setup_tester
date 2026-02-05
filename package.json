@@ -5,8 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "node scripts/generate-icons.js && electron-builder --dir",
-    "build": "node scripts/generate-icons.js && electron-builder",
+    "pack": "node scripts/generate-icons.js && node scripts/pack-platform.js",
+    "build": "node scripts/generate-icons.js && node scripts/build-platform.js",
+    "build:win": "node scripts/generate-icons.js && electron-builder --win --config.directories.output=dist/windows",
+    "build:mac": "node scripts/generate-icons.js && electron-builder --mac --config.directories.output=dist/macos",
     "smoke": "node scripts/smoke-test.js",
     "docs:pdf": "electron scripts/generate-explained-pdf.js"
   },
@@ -34,6 +36,7 @@
       "target": "nsis",
       "icon": "assets/icon-win.ico"
     },
+    "afterPack": "scripts/after-pack.js",
     "appId": "com.joostbosman.developerdiagnosticskit"
   }
 }

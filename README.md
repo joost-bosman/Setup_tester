@@ -55,7 +55,9 @@ macOS helper:
 - Note: I made an auto builder for macOS, but I could not build it myself.
 
 ## Where the executables are
-- Output folder: `dist/`
+- Output folders:
+  - Windows: `dist/windows/`
+  - macOS: `dist/macos/`
 - Windows installer: `*.exe` (NSIS)
 - macOS installer: `*.dmg`
 - macOS builds are best done on macOS (I don't have a Mac).

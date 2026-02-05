@@ -48,6 +48,6 @@ if [ ! -f "$ICON_ICNS" ]; then
 fi
 
 echo "Building installers..."
-npm run build
+DDK_EOL=lf npm run build
 
 echo "Done. Check the dist/ folder for the DMG."

@@ -802,7 +802,8 @@ ipcMain.handle("export-results", async (event, payload) => {
   if (canceled || !filePath) return { saved: false };
 
   if (format === "txt") {
-    await require("fs").promises.writeFile(filePath, contentText, "utf8");
+    const normalizedText = String(contentText || "").replace(/\r?\n/g, os.EOL);
+    await require("fs").promises.writeFile(filePath, normalizedText, "utf8");
     return { saved: true, path: filePath };
   }
 
