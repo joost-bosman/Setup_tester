@@ -14,7 +14,8 @@ if (platform === "win32") {
 }
 
 const cliPath = require.resolve("electron-builder/cli.js");
-const args = [cliPath, "--dir"];
+const extraArgs = process.argv.slice(2);
+const args = [cliPath, "--dir", ...extraArgs];
 if (target) args.push(target);
 args.push(`--config.directories.output=${outputDir}`);
 

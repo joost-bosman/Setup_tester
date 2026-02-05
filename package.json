@@ -17,7 +17,7 @@
     "electron-builder": "^24.13.3",
     "png-to-ico": "^2.1.0"
   },
-  "productName": "Multilingual Diagnostics Tool",
+  "productName": "Multilingual Developer Diagnostics Tool",
   "build": {
     "directories": {
       "buildResources": "assets",
@@ -27,7 +27,7 @@
       "**/*",
       "!dist/**"
     ],
-    "productName": "Multilingual Diagnostics Tool",
+    "productName": "Multilingual Developer Diagnostics Tool",
     "mac": {
       "target": "dmg",
       "icon": "assets/icon-mac.icns"
@@ -40,4 +40,5 @@
     "appId": "com.joostbosman.developerdiagnosticskit"
   }
 }
+
 

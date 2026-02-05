@@ -1,8 +1,8 @@
-# Multilingual Diagnostics Tool
+# Multilingual Developer Diagnostics Tool
 
 ![Build](https://github.com/joost-bosman/developer_diagnostics_kit/actions/workflows/build-release.yml/badge.svg)
 
-Multilingual diagnostics tool for Windows and macOS. Run quick hardware, software, and internet checks, then get focused suggestions to boost developer performance.
+Multilingual Developer Diagnostics Tool for Windows and macOS. Run quick hardware, software, and internet checks, then get focused suggestions to boost developer performance.
 
 ## Download
 - Latest releases: https://github.com/joost-bosman/developer_diagnostics_kit/releases
@@ -72,5 +72,6 @@ Docs:
 
 ## Credits
 See `CREDITS.md`.
+
 
 

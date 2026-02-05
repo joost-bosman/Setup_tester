@@ -37,9 +37,9 @@ jobs:
         with:
           name: ${{ runner.os }}-dist
           path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.blockmap
+            dist/windows/*.exe
+            dist/windows/*.blockmap
+            dist/macos/*.dmg
 
       - name: Notarize (placeholder)
         if: runner.os == 'macOS'
@@ -68,6 +68,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/**/Multilingual Diagnostics Tool Setup *.exe
-            dist/**/Multilingual Diagnostics Tool Setup *.exe.blockmap
-            dist/**/*.dmg
+            dist/windows/Multilingual Developer Diagnostics Tool Setup *.exe
+            dist/windows/Multilingual Developer Diagnostics Tool Setup *.exe.blockmap
+            dist/macos/*.dmg
+

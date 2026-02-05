@@ -17,7 +17,7 @@ function createWindow() {
     height,
     minWidth: 860,
     minHeight: 620,
-    title: "Multilingual Diagnostics Tool",
+    title: "Multilingual Developer Diagnostics Tool",
     backgroundColor: "#0f1115",
     icon: windowIcon,
     webPreferences: {
@@ -844,6 +844,7 @@ app.whenReady().then(createWindow);
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
 
 
 
