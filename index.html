@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Multilingual Developer Diagnostics Tool</title>
+    <title>Setup_tester</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -19,7 +19,7 @@
             </span>
           </div>
           <div>
-            <h1 data-i18n="app.title">Multilingual Developer Diagnostics Tool</h1>
+            <h1 data-i18n="app.title">Setup_tester</h1>
           </div>
         </div>
         <div class="badge" id="platformBadge" data-i18n="app.badge">Windows + macOS</div>
@@ -384,6 +384,10 @@
             <div class="action-row">
               <button id="exportBtn" class="secondary" disabled data-i18n="export.button">Export results</button>
             </div>
+            <div class="action-row">
+              <button id="saveBaselineBtn" class="secondary" data-i18n="baseline.save">Save baseline</button>
+              <button id="compareBaselineBtn" class="secondary" data-i18n="baseline.compare">Compare baseline</button>
+            </div>
             <div id="resultsStatus" class="status" data-i18n="results.status.ready">Ready.</div>
           </div>
         </section>
@@ -412,6 +416,8 @@
         <div class="modal-actions">
           <button id="exportTxt" class="secondary">TXT</button>
           <button id="exportPdf" class="secondary">PDF</button>
+          <button id="exportJson" class="secondary">JSON</button>
+          <button id="exportCsv" class="secondary">CSV</button>
           <button id="cancelExport" class="ghost" data-i18n="modal.cancel">Cancel</button>
         </div>
       </div>

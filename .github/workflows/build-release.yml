@@ -68,7 +68,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/windows/Multilingual Developer Diagnostics Tool Setup *.exe
-            dist/windows/Multilingual Developer Diagnostics Tool Setup *.exe.blockmap
+            dist/windows/Setup_tester Setup *.exe
+            dist/windows/Setup_tester Setup *.exe.blockmap
             dist/macos/*.dmg
+
 

@@ -34,7 +34,8 @@
     "iconset",
     "iconutil",
     "joostbosman",
-    "developerdiagnosticskit",
+    "setup_tester",
+    "setuptester",
     "nsis",
     "redactions"
   ],

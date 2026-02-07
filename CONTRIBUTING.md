@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for helping improve the Multilingual Developer Diagnostics Tool.
+Thank you for helping improve the Setup_tester.
 
 ## Quick start
 ```bash
@@ -28,3 +28,4 @@ npm run build
 
 ## Issues
 If you find a bug or have an idea, please use the GitHub issue templates.
+

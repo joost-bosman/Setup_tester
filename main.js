@@ -17,7 +17,7 @@ function createWindow() {
     height,
     minWidth: 860,
     minHeight: 620,
-    title: "Multilingual Developer Diagnostics Tool",
+    title: "Setup_tester",
     backgroundColor: "#0f1115",
     icon: windowIcon,
     webPreferences: {
@@ -50,6 +50,78 @@ function timestampStamp(date = new Date()) {
   const min = String(date.getMinutes()).padStart(2, "0");
   const ss = String(date.getSeconds()).padStart(2, "0");
   return `${dd}-${mm}-${yyyy}_${hh}-${min}-${ss}`;
+}
+
+function buildBaselineSnapshot(diag) {
+  return {
+    os: {
+      platform: diag?.os?.platform ?? null,
+      release: diag?.os?.release ?? null,
+      version: diag?.os?.version ?? null,
+      arch: diag?.os?.arch ?? null
+    },
+    cpu: {
+      model: diag?.cpu?.model ?? null,
+      cores: diag?.cpu?.cores ?? null,
+      totalSpeedGHz: diag?.cpu?.totalSpeedGHz ?? null
+    },
+    memory: {
+      total: diag?.memory?.total ?? null,
+      free: diag?.memory?.free ?? null
+    },
+    gpu: {
+      vendor: diag?.gpu?.vendor ?? null,
+      chip: diag?.gpu?.chip ?? null
+    },
+    app: {
+      version: diag?.app?.version ?? null,
+      electron: diag?.app?.electron ?? null,
+      node: diag?.app?.node ?? null,
+      chrome: diag?.app?.chrome ?? null
+    },
+    internet: {
+      downloadMbps: diag?.internet?.downloadMbps ?? null,
+      uploadMbps: diag?.internet?.uploadMbps ?? null,
+      pingMs: diag?.internet?.pingMs ?? null
+    }
+  };
+}
+
+function flattenSnapshot(obj, prefix = "", out = []) {
+  if (!obj || typeof obj !== "object") return out;
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    const pathKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      flattenSnapshot(value, pathKey, out);
+      return;
+    }
+    out.push({ path: pathKey, value });
+  });
+  return out;
+}
+
+function compareSnapshots(baseline, current) {
+  const base = buildBaselineSnapshot(baseline);
+  const now = buildBaselineSnapshot(current);
+  const baseFlat = flattenSnapshot(base);
+  const nowFlat = flattenSnapshot(now);
+  const lookup = new Map(nowFlat.map((entry) => [entry.path, entry.value]));
+  const normalize = (value) => {
+    if (value === null || value === undefined || value === "") return "n/a";
+    if (Number.isFinite(value)) return value;
+    return String(value);
+  };
+  const changes = [];
+  baseFlat.forEach((entry) => {
+    const nextVal = lookup.get(entry.path);
+    const before = normalize(entry.value);
+    const after = normalize(nextVal);
+    if (before !== after) {
+      changes.push({ path: entry.path, before, after });
+    }
+  });
+  return changes;
 }
 
 function getNetworkIps() {
@@ -788,15 +860,26 @@ ipcMain.handle("run-setup", async (_event, action) => {
 });
 
 ipcMain.handle("export-results", async (event, payload) => {
-  const { format, contentText, contentHtml } = payload;
+  const { format, contentText, contentHtml, contentJson, contentCsv } = payload;
   const stamp = timestampStamp();
-  const defaultName = `results_diagnostic_${stamp}.${format === "pdf" ? "pdf" : "txt"}`;
+  const extension = format === "pdf"
+    ? "pdf"
+    : format === "json"
+      ? "json"
+      : format === "csv"
+        ? "csv"
+        : "txt";
+  const defaultName = `results_diagnostic_${stamp}.${extension}`;
   const { canceled, filePath } = await dialog.showSaveDialog({
     title: "Save Diagnostics",
     defaultPath: path.join(app.getPath("documents"), defaultName),
     filters: format === "pdf"
       ? [{ name: "PDF", extensions: ["pdf"] }]
-      : [{ name: "Text", extensions: ["txt"] }]
+      : format === "json"
+        ? [{ name: "JSON", extensions: ["json"] }]
+        : format === "csv"
+          ? [{ name: "CSV", extensions: ["csv"] }]
+          : [{ name: "Text", extensions: ["txt"] }]
   });
 
   if (canceled || !filePath) return { saved: false };
@@ -804,6 +887,14 @@ ipcMain.handle("export-results", async (event, payload) => {
   if (format === "txt") {
     const normalizedText = String(contentText || "").replace(/\r?\n/g, os.EOL);
     await require("fs").promises.writeFile(filePath, normalizedText, "utf8");
+    return { saved: true, path: filePath };
+  }
+  if (format === "json") {
+    await require("fs").promises.writeFile(filePath, String(contentJson || ""), "utf8");
+    return { saved: true, path: filePath };
+  }
+  if (format === "csv") {
+    await require("fs").promises.writeFile(filePath, String(contentCsv || ""), "utf8");
     return { saved: true, path: filePath };
   }
 
@@ -839,13 +930,144 @@ ipcMain.handle("export-results", async (event, payload) => {
   return { saved: true, path: filePath };
 });
 
-app.whenReady().then(createWindow);
+ipcMain.handle("save-baseline", async (_event, payload) => {
+  const { current } = payload || {};
+  if (!current) return { saved: false };
+  const stamp = timestampStamp();
+  const defaultName = `baseline_${stamp}.json`;
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: "Save Baseline",
+    defaultPath: path.join(app.getPath("documents"), defaultName),
+    filters: [{ name: "JSON", extensions: ["json"] }]
+  });
+  if (canceled || !filePath) return { saved: false };
+  const data = {
+    baselineMeta: {
+      createdAt: new Date().toISOString(),
+      app: app.getName(),
+      version: app.getVersion()
+    },
+    diagnostics: current
+  };
+  await require("fs").promises.writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+  return { saved: true, path: filePath };
+});
+
+ipcMain.handle("compare-baseline", async (_event, payload) => {
+  const { current } = payload || {};
+  if (!current) return { ok: false, error: "No diagnostics to compare." };
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: "Select baseline file",
+    properties: ["openFile"],
+    filters: [{ name: "JSON", extensions: ["json"] }]
+  });
+  if (canceled || !filePaths?.length) return { ok: false, canceled: true };
+  const baselinePath = filePaths[0];
+  let baselineData;
+  try {
+    const raw = await require("fs").promises.readFile(baselinePath, "utf8");
+    baselineData = JSON.parse(raw);
+  } catch (err) {
+    return { ok: false, error: err.message || "Failed to read baseline file." };
+  }
+  const baselineDiagnostics = baselineData?.diagnostics || baselineData;
+  const diff = compareSnapshots(baselineDiagnostics, current);
+  return {
+    ok: true,
+    path: baselinePath,
+    baselineMeta: baselineData?.baselineMeta || null,
+    diff
+  };
+});
+
+const isCli = process.argv.includes("--cli");
+
+app.whenReady().then(async () => {
+  if (!isCli) {
+    createWindow();
+    return;
+  }
+  const getArgValue = (flag) => {
+    const hit = process.argv.find((arg) => arg.startsWith(`${flag}=`));
+    return hit ? hit.slice(flag.length + 1) : null;
+  };
+  const hasFlag = (flag) => process.argv.includes(flag);
+  const approach = getArgValue("--approach") || "brief";
+  const mode = approach === "brief" ? "quick" : "full";
+  const includeSoftware = !hasFlag("--no-software");
+  const includeDependencies = !hasFlag("--no-dependencies");
+  const includeOptimization = !hasFlag("--no-optimization");
+  const format = (getArgValue("--format") || "json").toLowerCase();
+  const outputPath = getArgValue("--output");
+  const baselinePath = getArgValue("--baseline");
+
+  let diagnostics;
+  try {
+    diagnostics = await collectDiagnostics({
+      approach,
+      mode,
+      includeSoftware,
+      includeDependencies,
+      includeOptimization
+    });
+  } catch (err) {
+    console.error(err);
+    app.exit(1);
+    return;
+  }
+
+  const payload = { diagnostics };
+  if (baselinePath) {
+    try {
+      const raw = await require("fs").promises.readFile(baselinePath, "utf8");
+      const baselineData = JSON.parse(raw);
+      const baselineDiagnostics = baselineData?.diagnostics || baselineData;
+      payload.baselineDiff = compareSnapshots(baselineDiagnostics, diagnostics);
+    } catch (err) {
+      payload.baselineError = err.message || "Failed to read baseline file.";
+    }
+  }
+
+  const toCsv = (obj) => {
+    const rows = [["path", "value"]];
+    const flatten = (value, prefix = "") => {
+      if (Array.isArray(value)) {
+        rows.push([prefix, value.join("; ")]);
+        return;
+      }
+      if (value && typeof value === "object") {
+        Object.keys(value).forEach((key) => flatten(value[key], prefix ? `${prefix}.${key}` : key));
+        return;
+      }
+      rows.push([prefix, value ?? ""]);
+    };
+    flatten(obj);
+    return rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join(os.EOL);
+  };
+
+  const output = format === "csv"
+    ? toCsv(payload)
+    : JSON.stringify(payload, null, 2);
+
+  try {
+    if (outputPath) {
+      await require("fs").promises.writeFile(outputPath, output, "utf8");
+    } else {
+      console.log(output);
+    }
+  } catch (err) {
+    console.error(err);
+    app.exit(1);
+    return;
+  }
+  app.exit(0);
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
-
-
 
 
 

@@ -7,6 +7,8 @@ const suggestionsList = document.getElementById("suggestionsList");
 const modal = document.getElementById("modal");
 const exportTxt = document.getElementById("exportTxt");
 const exportPdf = document.getElementById("exportPdf");
+const exportJson = document.getElementById("exportJson");
+const exportCsv = document.getElementById("exportCsv");
 const cancelExport = document.getElementById("cancelExport");
 const setupCard = document.getElementById("setupCard");
 const setupInstall = document.getElementById("setupInstall");
@@ -25,12 +27,15 @@ const screenResults = document.getElementById("screenResults");
   const languageContinue = document.getElementById("languageContinue");
   const detectLanguageBtn = document.getElementById("detectLanguageBtn");
   const languageStatus = document.getElementById("languageStatus");
-  const languageSelect = document.getElementById("languageSelect");
-  const languageApply = document.getElementById("languageApply");
-  const languageCard = document.querySelector(".language-card");
+const languageSelect = document.getElementById("languageSelect");
+const languageApply = document.getElementById("languageApply");
+const languageCard = document.querySelector(".language-card");
+const saveBaselineBtn = document.getElementById("saveBaselineBtn");
+const compareBaselineBtn = document.getElementById("compareBaselineBtn");
 
 let lastResults = null;
 let lastOptions = null;
+let lastBaselineDiff = null;
 
 // Language setup for UI + report text.
 const LANG_STORAGE_KEY = "ddk.language";
@@ -91,7 +96,7 @@ const LANGUAGES = {
   "en-GB": {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -183,6 +188,12 @@ const LANGUAGES = {
       "status.export.complete": "Export complete.",
       "status.export.canceled": "Export canceled.",
       "status.export.failed": "Export failed.",
+      "status.baseline.saving": "Saving baseline...",
+      "status.baseline.saved": "Baseline saved.",
+      "status.baseline.canceled": "Baseline canceled.",
+      "status.baseline.failed": "Baseline failed.",
+      "status.baseline.loading": "Loading baseline...",
+      "status.baseline.compare.complete": "Baseline comparison ready.",
       "progress.title": "Running diagnostics...",
       "progress.preparing": "Preparing checks.",
       "progress.running": "Running {mode} checks...",
@@ -192,12 +203,19 @@ const LANGUAGES = {
       "export.title": "Export results",
       "export.button": "Export results",
       "export.previous": "Previous",
+      "baseline.save": "Save baseline",
+      "baseline.compare": "Compare baseline",
       "results.status.ready": "Ready.",
       "results.status.running": "Running...",
       "results.status.complete": "Complete.",
       "results.status.failed": "Failed.",
       "suggestions.title": "Optimization suggestions",
       "suggestions.placeholder": "Run diagnostics to see suggestions.",
+      "section.summary": "Summary",
+      "label.healthScore": "Health score",
+      "label.topPriorities": "Top priorities",
+      "section.baseline": "Baseline comparison",
+      "label.baseline.noChanges": "No changes detected.",
         "actions.close": "Close application",
         "actions.previous": "Previous",
         "modal.title": "Export results",
@@ -319,7 +337,7 @@ const LANGUAGES = {
   nl: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -505,7 +523,7 @@ const LANGUAGES = {
   fr: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -690,7 +708,7 @@ const LANGUAGES = {
   es: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -875,7 +893,7 @@ const LANGUAGES = {
   pt: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1060,7 +1078,7 @@ const LANGUAGES = {
   it: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1245,7 +1263,7 @@ const LANGUAGES = {
   pl: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1430,7 +1448,7 @@ const LANGUAGES = {
   uk: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1615,7 +1633,7 @@ const LANGUAGES = {
   hi: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1800,7 +1818,7 @@ const LANGUAGES = {
   ar: {
     dir: "rtl",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -1985,7 +2003,7 @@ const LANGUAGES = {
   id: {
     dir: "ltr",
     strings: {
-      "app.title": "Multilingual Developer Diagnostics Tool",
+      "app.title": "Setup_tester",
       "app.badge": "Windows + macOS",
       "platform.windows": "Windows",
       "platform.macos": "macOS",
@@ -2286,8 +2304,11 @@ function shouldFallbackTranslation(value) {
     const input = document.querySelector(`input[name="language"][value="${next}"]`);
     if (input) input.checked = true;
     applyTranslations();
-    if (lastResults) {
-      resultsEl.textContent = formatForDisplay(lastResults, lastOptions?.approach);
+      if (lastResults) {
+        resultsEl.textContent = formatForDisplay(lastResults, lastOptions?.approach, {
+          includeOptimization: lastOptions?.includeOptimization,
+          baselineDiff: lastBaselineDiff
+        });
       const suggestions = lastOptions?.includeOptimization
         ? getSuggestions(lastResults, lastOptions?.approach)
         : [t("note.optimization.disabled")];
@@ -2413,10 +2434,108 @@ function getSelectedCheckbox(name, fallback = true) {
     if (screen === screenLanguage) adjustLanguageScale();
   }
 
-// Convert raw diagnostics into readable text.
-function formatForDisplay(obj, approach = "extensive") {
+  function parseSizeToGb(value) {
+    if (!value) return null;
+    const match = String(value).match(/([\d.]+)\s*(TB|GB|MB)/i);
+    if (!match) return null;
+    const num = Number(match[1]);
+    if (!Number.isFinite(num)) return null;
+    const unit = match[2].toUpperCase();
+    if (unit === "TB") return num * 1024;
+    if (unit === "MB") return num / 1024;
+    return num;
+  }
+
+  function computeHealthScore(diag, approach = "extensive") {
+    let score = 100;
+    const missingDeps = Array.isArray(diag?.dependencies)
+      ? diag.dependencies.filter((item) => !item.present).map((item) => item.name)
+      : [];
+    const missingSoftware = Array.isArray(diag?.software)
+      ? diag.software.filter((item) => !item.present).map((item) => item.name)
+      : [];
+    const cliEntries = diag?.cli ? Object.entries(diag.cli) : [];
+    const missingCliCount = cliEntries.filter(([, info]) => info?.ok === false).length;
+    const totalGb = parseSizeToGb(diag?.memory?.total);
+    const pingMs = Number(diag?.internet?.pingMs);
+    const downloadMbps = Number(diag?.internet?.downloadMbps);
+
+    score -= Math.min(30, missingDeps.length * 5);
+    score -= Math.min(10, missingSoftware.length * 2);
+    score -= Math.min(15, missingCliCount * 3);
+
+    if (Number.isFinite(totalGb)) {
+      if (totalGb < 8) score -= 15;
+      else if (totalGb < 16) score -= 8;
+    }
+
+    if (approach !== "brief") {
+      if (diag?.internet?.ok === false) score -= 10;
+      if (Number.isFinite(pingMs) && pingMs > 100) score -= 5;
+      if (Number.isFinite(downloadMbps) && downloadMbps > 0 && downloadMbps < 25) score -= 5;
+    }
+
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    return score;
+  }
+
+  function getTopPriorities(diag, approach, includeOptimization) {
+    if (!includeOptimization) return [t("note.optimization.disabled")];
+    return getSuggestions(diag, approach).slice(0, 3);
+  }
+
+  function formatBaselineDiff(diff) {
+    if (!Array.isArray(diff) || diff.length === 0) {
+      return [t("section.baseline"), `- ${t("label.baseline.noChanges")}`];
+    }
+    return [
+      t("section.baseline"),
+      ...diff.map((item) => `- ${item.path}: ${item.before} -> ${item.after}`)
+    ];
+  }
+
+  function formatCsvExport(payload) {
+    const rows = [["path", "value"]];
+    const flatten = (value, prefix = "") => {
+      if (Array.isArray(value)) {
+        rows.push([prefix, value.join("; ")]);
+        return;
+      }
+      if (value && typeof value === "object") {
+        Object.keys(value).forEach((key) => flatten(value[key], prefix ? `${prefix}.${key}` : key));
+        return;
+      }
+      rows.push([prefix, value ?? ""]);
+    };
+    flatten(payload);
+    return rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+  }
+
+  function buildExportPayload(diag, approach, includeOptimization, baselineDiff) {
+    const suggestions = includeOptimization
+      ? getSuggestions(diag, approach)
+      : [t("note.optimization.disabled")];
+    return {
+      generatedAt: new Date().toISOString(),
+      approach,
+      summary: {
+        healthScore: computeHealthScore(diag, approach),
+        topPriorities: getTopPriorities(diag, approach, includeOptimization)
+      },
+      suggestions,
+      baselineDiff: baselineDiff || [],
+      diagnostics: diag
+    };
+  }
+
+  // Convert raw diagnostics into readable text.
+function formatForDisplay(obj, approach = "extensive", options = {}) {
   if (!obj) return t("note.noDiagnostics");
   const isBrief = approach === "brief";
+  const includeOptimization = options.includeOptimization !== false;
+  const baselineDiff = options.baselineDiff || null;
   const formatValue = (value) => {
     if (value === null || value === undefined || value === "") return t("note.na");
     if (Array.isArray(value)) return value.length ? value.join(", ") : t("note.na");
@@ -2455,6 +2574,14 @@ function formatForDisplay(obj, approach = "extensive") {
   });
   const dependencyPresent = dependencyPresentItems.length;
 
+  const healthScore = computeHealthScore(obj, approach);
+  const topPriorities = getTopPriorities(obj, approach, includeOptimization);
+  const summaryLines = [
+    t("section.summary"),
+    `- ${t("label.healthScore")}: ${healthScore}/100`,
+    `- ${t("label.topPriorities")}: ${topPriorities.length ? topPriorities.join("; ") : t("note.na")}`
+  ];
+
   if (isBrief) {
     const cliOk = cliEntries.filter(([, info]) => info?.ok).length;
     const missingEssentials = [].concat(cliMissing, dependencyMissing);
@@ -2463,6 +2590,10 @@ function formatForDisplay(obj, approach = "extensive") {
       : `${toMBps(obj?.internet?.downloadMbps)} MB/s down, ${toMBps(obj?.internet?.uploadMbps)} MB/s up, ${formatValue(obj?.internet?.pingMs)} ms ping`;
     const briefLines = [
       t("results.brief.title"),
+      "",
+      ...summaryLines,
+      ...(baselineDiff ? ["", ...formatBaselineDiff(baselineDiff)] : []),
+      "",
       `- ${t("brief.os")}: ${formatValue(obj?.os?.version)} (${formatValue(obj?.os?.release)})`,
       `- ${t("brief.arch")}: ${formatValue(obj?.os?.arch)}`,
       `- ${t("brief.cpu")}: ${formatValue(obj?.cpu?.model)} (${formatValue(obj?.cpu?.cores)} ${t("label.cores")})`,
@@ -2481,6 +2612,9 @@ function formatForDisplay(obj, approach = "extensive") {
 
   const lines = [
     t("results.extensive.title"),
+    "",
+    ...summaryLines,
+    ...(baselineDiff ? ["", ...formatBaselineDiff(baselineDiff)] : []),
     "",
     t("section.os"),
     `- ${t("label.version")}: ${formatValue(obj?.os?.version)}`,
@@ -2743,24 +2877,24 @@ function getSuggestions(diag, approach = "extensive") {
   return finalSuggestions;
 }
 
-function formatForText(obj) {
-  const suggestions = lastOptions?.includeOptimization
-    ? getSuggestions(obj, lastOptions?.approach)
+function formatForText(obj, options = {}) {
+  const suggestions = options.includeOptimization
+    ? getSuggestions(obj, options.approach)
     : [t("note.optimization.disabled")];
   return [
-    formatForDisplay(obj, lastOptions?.approach),
+    formatForDisplay(obj, options.approach, options),
     "",
     `${t("section.suggestions")}:`,
     ...suggestions.map((item) => `- ${item}`)
   ].join("\n");
 }
 
-function formatForPdf(obj) {
-  const suggestions = lastOptions?.includeOptimization
-    ? getSuggestions(obj, lastOptions?.approach)
+function formatForPdf(obj, options = {}) {
+  const suggestions = options.includeOptimization
+    ? getSuggestions(obj, options.approach)
     : [t("note.optimization.disabled")];
   return [
-    formatForDisplay(obj, lastOptions?.approach),
+    formatForDisplay(obj, options.approach, options),
     "",
     `${t("section.suggestions")}:`,
     ...suggestions.map((item) => `- ${item}`)
@@ -2791,8 +2925,12 @@ async function runDiagnostics() {
       includeOptimization
     });
     lastOptions = { includeSoftware, includeDependencies, includeOptimization, approach };
+    lastBaselineDiff = null;
     lastResults = data;
-    resultsEl.textContent = formatForDisplay(data, approach);
+    resultsEl.textContent = formatForDisplay(data, approach, {
+      includeOptimization,
+      baselineDiff: lastBaselineDiff
+    });
     const suggestions = includeOptimization ? getSuggestions(data, approach) : [t("note.optimization.disabled")];
     suggestionsList.innerHTML = suggestions.map((item) => `<li>${item}</li>`).join("");
     if (timestampEl) timestampEl.textContent = new Date().toLocaleString();
@@ -2822,20 +2960,72 @@ function closeModal() {
 async function exportResults(format) {
   if (!lastResults) return;
   statusEl.textContent = t("status.exporting", { format: format.toUpperCase() });
-  const contentText = formatForText(lastResults);
-  const contentHtml = formatForPdf(lastResults)
+  const options = {
+    approach: lastOptions?.approach,
+    includeOptimization: lastOptions?.includeOptimization,
+    baselineDiff: lastBaselineDiff
+  };
+  const contentText = formatForText(lastResults, options);
+  const contentHtml = formatForPdf(lastResults, options)
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+  const exportPayload = buildExportPayload(
+    lastResults,
+    options.approach,
+    options.includeOptimization,
+    options.baselineDiff
+  );
+  const contentJson = JSON.stringify(exportPayload, null, 2);
+  const contentCsv = formatCsvExport(exportPayload);
 
   try {
     const res = await window.diagnostics.exportResults({
       format,
       contentText,
-      contentHtml
+      contentHtml,
+      contentJson,
+      contentCsv
     });
     statusEl.textContent = res.saved ? t("status.export.complete") : t("status.export.canceled");
   } catch (err) {
     statusEl.textContent = t("status.export.failed");
+  }
+}
+
+async function saveBaseline() {
+  if (!lastResults) return;
+  statusEl.textContent = t("status.baseline.saving");
+  try {
+    const res = await window.diagnostics.saveBaseline({ current: lastResults });
+    statusEl.textContent = res.saved
+      ? t("status.baseline.saved")
+      : t("status.baseline.canceled");
+  } catch (err) {
+    statusEl.textContent = t("status.baseline.failed");
+  }
+}
+
+async function compareBaseline() {
+  if (!lastResults) return;
+  statusEl.textContent = t("status.baseline.loading");
+  try {
+    const res = await window.diagnostics.compareBaseline({ current: lastResults });
+    if (!res || res.canceled) {
+      statusEl.textContent = t("status.baseline.canceled");
+      return;
+    }
+    if (!res.ok) {
+      statusEl.textContent = t("status.baseline.failed");
+      return;
+    }
+    lastBaselineDiff = res.diff || [];
+    resultsEl.textContent = formatForDisplay(lastResults, lastOptions?.approach, {
+      includeOptimization: lastOptions?.includeOptimization,
+      baselineDiff: lastBaselineDiff
+    });
+    statusEl.textContent = t("status.baseline.compare.complete");
+  } catch (err) {
+    statusEl.textContent = t("status.baseline.failed");
   }
 }
 
@@ -2870,6 +3060,25 @@ exportPdf.addEventListener("click", async () => {
   closeModal();
   await exportResults("pdf");
 });
+if (exportJson) {
+  exportJson.addEventListener("click", async () => {
+    closeModal();
+    await exportResults("json");
+  });
+}
+if (exportCsv) {
+  exportCsv.addEventListener("click", async () => {
+    closeModal();
+    await exportResults("csv");
+  });
+}
+
+if (saveBaselineBtn) {
+  saveBaselineBtn.addEventListener("click", saveBaseline);
+}
+if (compareBaselineBtn) {
+  compareBaselineBtn.addEventListener("click", compareBaseline);
+}
 
 if (closeApp) {
   closeApp.addEventListener("click", () => {
@@ -2916,3 +3125,4 @@ if (setupInstall) {
   window.addEventListener("resize", adjustLanguageScale);
 
   initLanguage();
+

@@ -12,10 +12,12 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ASSETS_DIR="$ROOT_DIR/assets"
+cd "$ROOT_DIR"
+
 echo "Installing dependencies..."
 npm install
-
-ASSETS_DIR="$(cd "$(dirname "$0")" && pwd)/assets"
 ICON_PNG="$ASSETS_DIR/icon-mac.png"
 ICON_ICNS="$ASSETS_DIR/icon-mac.icns"
 ICONSET_DIR="$ASSETS_DIR/icon-mac.iconset"

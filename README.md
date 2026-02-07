@@ -1,12 +1,13 @@
-# Multilingual Developer Diagnostics Tool
+# Setup_tester
 
-![Build](https://img.shields.io/github/actions/workflow/status/joost-bosman/Multilingual_Developer_Diagnostics_Tool/build-release.yml?label=build)
+![Build](https://img.shields.io/github/actions/workflow/status/joost-bosman/Setup_tester/build-release.yml?label=build)
 
-Know your setup. Fix the gaps. Feel the 'yes! yes!' when you code, for Windows and macOS.
+Know your setup. Fix the gaps. Feel the "yes! yes!" when you code, for Windows and macOS.
 
-This is the tool you reach for when you want to feel confident about the current state of your setup. Run it and you will see what is strong, what is missing, and what is holding you back across hardware, software, IDE, language(s), and Wi-Fi/LAN. Then comes the best part: it turns that insight into clear, practical suggestions, plus an exportable checklist so you can improve step by step.
+This tool shows what is strong, what is missing, and what is holding you back across hardware, software, IDE, languages, and Wi-Fi/LAN.
+It then turns that insight into clear, practical suggestions and an exportable checklist so you can improve step by step.
 
-Main goal: get the most from your setup and feel that smooth, fast "yes! yes!" energy as you start coding and developing.
+Main goal: get the most from your setup and keep that smooth, fast "yes! yes!" energy when you start building.
 
 Good luck! Cheers!
 
@@ -14,7 +15,7 @@ Good luck! Cheers!
 At a certain point, you want to know the real state of your setup, what is missing, and how to make it faster, smoother, and more efficient. This tool makes that clear and gives you a path to fix it.
 
 ## Download
-- Latest releases: https://github.com/joost-bosman/Multilingual_Developer_Diagnostics_Tool/releases
+- Latest releases: https://github.com/joost-bosman/Setup_tester/releases
 
 ## Documentation
 - Explained guide: `docs/EXPLAINED.md`
@@ -47,8 +48,12 @@ At a certain point, you want to know the real state of your setup, what is missi
 - Results you can act on.
   - Brief mode: a fast overview plus focused fixes for weak spots and missing dependencies.
   - Extensive mode: deeper detail and broader tuning suggestions.
-  - Export to TXT or PDF with timestamped filenames: `results_diagnostic_DDMMYY`.
+  - Export to TXT, PDF, JSON, or CSV with timestamped filenames: `results_diagnostic_DDMMYY`.
   - Shows "n/a" when the OS/driver cannot provide a value.
+- Quick summary.
+  - Health score and top priorities to focus on first.
+- Baseline checks.
+  - Save a baseline and compare against later runs.
 
 ## Quick start
 Get moving in two commands:
@@ -65,8 +70,8 @@ npm run build
 ```
 
 macOS helper:
-- `./mac_diagtool_program_builder.sh`
-- Note: I made an auto builder for macOS, but I could not build it myself.
+- `./scripts/mac_build.sh`
+- Note: I made an auto-builder for macOS, but I could not build it myself.
 
 ## Where the executables are
 - Output folders:
@@ -76,13 +81,28 @@ macOS helper:
 - macOS installer: `*.dmg`
 The mac helper script generates `assets/icon-mac.icns` from `assets/icon-mac.png` before building.
 
-## Trust and quality
+## Trust, testing, and responsibility
 - CI build status is visible via the badge at the top of this README.
 - Each release includes a clear change summary.
-- See `TEST_REPORT.md` for recent test runs.
+- Every tweak, addition, build, and release is meant to get a vulnerability check.
+- Vulnerability test results live in `docs/VULNERABILITY_TEST_RESULTS.md` and skip personal or setup-specific details.
+- Tool status: "it is what it is." This is a helping tool, not a replacement for your own responsibility or judgment.
+- Hobby project with limited time; releases are best-effort.
 
 ## Manual step
 - Add GitHub Topics in repo settings (e.g., diagnostics, electron, windows, macos, developer-tools).
+
+## CLI mode (optional)
+Run diagnostics without the UI:
+```bash
+npm run cli -- --approach=brief --format=json
+```
+Common flags:
+- `--format=json|csv`
+- `--output=PATH`
+- `--baseline=PATH`
+- `--approach=brief|extensive`
+- `--no-software`, `--no-dependencies`, `--no-optimization`
 
 ## Contributing
 See `CONTRIBUTING.md`.
@@ -101,6 +121,5 @@ See `docs/KEYWORDS.md`.
 
 ## Credits
 See `CREDITS.md`.
-
 
 

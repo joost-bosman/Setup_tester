@@ -1,7 +1,8 @@
 {
-  "name": "developer_diagnostics_kit",
+  "name": "setup_tester",
   "version": "1.0.6",
-  "description": "Developer diagnostics app (Windows + macOS) with privacy controls.",
+  "description": "Setup tester app (Windows + macOS) with privacy controls.",
+  "author": "joost-bosman",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -10,14 +11,15 @@
     "build:win": "node scripts/generate-icons.js && electron-builder --win --config.directories.output=dist/windows",
     "build:mac": "node scripts/generate-icons.js && electron-builder --mac --config.directories.output=dist/macos",
     "smoke": "node scripts/smoke-test.js",
-    "docs:pdf": "electron scripts/generate-explained-pdf.js"
+    "docs:pdf": "electron scripts/generate-explained-pdf.js",
+    "cli": "electron . --cli"
   },
   "devDependencies": {
     "electron": "^28.3.3",
     "electron-builder": "^24.13.3",
     "png-to-ico": "^2.1.0"
   },
-  "productName": "Multilingual Developer Diagnostics Tool",
+  "productName": "Setup_tester",
   "build": {
     "directories": {
       "buildResources": "assets",
@@ -27,7 +29,7 @@
       "**/*",
       "!dist/**"
     ],
-    "productName": "Multilingual Developer Diagnostics Tool",
+    "productName": "Setup_tester",
     "mac": {
       "target": "dmg",
       "icon": "assets/icon-mac.icns"
@@ -37,6 +39,7 @@
       "icon": "assets/icon-win.ico"
     },
     "afterPack": "scripts/after-pack.js",
-    "appId": "com.joostbosman.developerdiagnosticskit"
+    "appId": "com.joostbosman.setup_tester"
   }
 }
+
