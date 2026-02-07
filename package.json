@@ -11,7 +11,9 @@
     "build:win": "node scripts/generate-icons.js && electron-builder --win --config.directories.output=dist/windows",
     "build:mac": "node scripts/generate-icons.js && electron-builder --mac --config.directories.output=dist/macos",
     "smoke": "node scripts/smoke-test.js",
-    "docs:pdf": "electron scripts/generate-explained-pdf.js",
+    "test": "node scripts/run-tests.js",
+    "docs:html": "node scripts/generate-explained-html.js",
+    "docs:pdf": "node scripts/generate-explained-html.js && electron scripts/generate-explained-pdf.js",
     "cli": "electron . --cli"
   },
   "devDependencies": {

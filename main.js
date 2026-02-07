@@ -3,6 +3,10 @@ const path = require("path");
 const os = require("os");
 const fs = require("fs");
 const { execFile } = require("child_process");
+const https = require("https");
+const { formatCsvExport } = require("./lib/csv-utils");
+const { isNetworkPath } = require("./lib/path-utils");
+const { summarizeSpeedtestResults } = require("./lib/speedtest-utils");
 
 const windowIcon = process.platform === "darwin"
   ? path.join(__dirname, "assets", "icon-mac.png")
@@ -40,6 +44,21 @@ function formatBytes(bytes) {
     i += 1;
   }
   return `${value.toFixed(2)} ${units[i]}`;
+}
+
+function parseSizeToBytes(value) {
+  if (!value) return null;
+  const match = String(value).match(/([\d.]+)\s*(B|KB|MB|GB|TB)/i);
+  if (!match) return null;
+  const num = Number(match[1]);
+  if (!Number.isFinite(num)) return null;
+  const unit = match[2].toUpperCase();
+  const base = 1024;
+  if (unit === "TB") return Math.round(num * base ** 4);
+  if (unit === "GB") return Math.round(num * base ** 3);
+  if (unit === "MB") return Math.round(num * base ** 2);
+  if (unit === "KB") return Math.round(num * base);
+  return Math.round(num);
 }
 
 function timestampStamp(date = new Date()) {
@@ -107,18 +126,27 @@ function compareSnapshots(baseline, current) {
   const baseFlat = flattenSnapshot(base);
   const nowFlat = flattenSnapshot(now);
   const lookup = new Map(nowFlat.map((entry) => [entry.path, entry.value]));
-  const normalize = (value) => {
-    if (value === null || value === undefined || value === "") return "n/a";
-    if (Number.isFinite(value)) return value;
-    return String(value);
+  const normalizeForCompare = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return { compare: "n/a", display: "n/a" };
+    }
+    if (Number.isFinite(value)) {
+      return { compare: value, display: value };
+    }
+    const text = String(value);
+    const bytes = parseSizeToBytes(text);
+    if (Number.isFinite(bytes)) {
+      return { compare: bytes, display: text };
+    }
+    return { compare: text, display: text };
   };
   const changes = [];
   baseFlat.forEach((entry) => {
     const nextVal = lookup.get(entry.path);
-    const before = normalize(entry.value);
-    const after = normalize(nextVal);
-    if (before !== after) {
-      changes.push({ path: entry.path, before, after });
+    const before = normalizeForCompare(entry.value);
+    const after = normalizeForCompare(nextVal);
+    if (before.compare !== after.compare) {
+      changes.push({ path: entry.path, before: before.display, after: after.display });
     }
   });
   return changes;
@@ -201,15 +229,46 @@ async function getWindowsNetworkAdapters() {
 }
 
 async function getWindowsWifiInfo() {
-  const res = await runCommand("netsh", ["wlan", "show", "interfaces"]);
-  if (!res.ok) return null;
-  const parsed = parseKeyValueLines(res.output);
-  if (!parsed) return null;
+  const script = `
+    $adapter = Get-NetAdapter -PhysicalMediaType Native 802.11 -ErrorAction SilentlyContinue | Select-Object -First 1;
+    $hasAdapter = $null -ne $adapter;
+    $status = if ($adapter) { $adapter.Status } else { $null };
+    $ssidBytes = Get-CimInstance -Namespace root\\wmi -ClassName MSNdis_80211_ServiceSetIdentifier -ErrorAction SilentlyContinue |
+      Select-Object -First 1 -ExpandProperty Ndis80211SsId;
+    if (-not $ssidBytes) {
+      $ssidBytes = Get-WmiObject -Namespace root\\wmi -Class MSNdis_80211_ServiceSetIdentifier -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty Ndis80211SsId;
+    }
+    $ssid = $null;
+    if ($ssidBytes) { $ssid = [System.Text.Encoding]::ASCII.GetString($ssidBytes).Trim([char]0) }
+    $signal = Get-CimInstance -Namespace root\\wmi -ClassName MSNdis_80211_ReceivedSignalStrength -ErrorAction SilentlyContinue |
+      Select-Object -First 1 -ExpandProperty Ndis80211ReceivedSignalStrength;
+    if (-not $signal) {
+      $signal = Get-WmiObject -Namespace root\\wmi -Class MSNdis_80211_ReceivedSignalStrength -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty Ndis80211ReceivedSignalStrength;
+    }
+    [pscustomobject]@{ hasAdapter = $hasAdapter; ssid = $ssid; state = $status; signal = $signal } | ConvertTo-Json
+  `;
+  const data = await runPowerShellJson(script);
+  if (!data) {
+    return { errorCode: "note.wifi.unavailable", error: "Wi-Fi info unavailable." };
+  }
+  if (data.hasAdapter === false) {
+    return { errorCode: "note.wifi.unavailable", error: "No Wi-Fi adapter detected." };
+  }
+  const ssid = data.ssid && String(data.ssid).trim() ? data.ssid : null;
+  const signalValue = Number(data.signal);
+  const hasUsefulData = Boolean(ssid || data.state || Number.isFinite(signalValue));
+  if (!hasUsefulData) {
+    return { errorCode: "note.wifi.unavailable", error: "Wi-Fi info unavailable." };
+  }
   return {
-    ssid: parsed.ssid || null,
-    state: parsed.state || null,
-    signal: parsed.signal || null,
-    radio: parsed["radio type"] || null
+    ssid,
+    state: data.state || null,
+    signal: Number.isFinite(signalValue) ? `${signalValue}%` : null,
+    radio: null,
+    errorCode: null,
+    error: null
   };
 }
 
@@ -285,15 +344,19 @@ async function getMacDefaultGateway() {
 
 async function getWindowsCpuDetails() {
   const data = await runPowerShellJson(
-    "Get-CimInstance Win32_Processor | Select-Object -First 1 Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors, CurrentClockSpeed, MaxClockSpeed, CurrentVoltage | ConvertTo-Json"
+    "Get-CimInstance Win32_Processor | Select-Object Name, Manufacturer, NumberOfCores, NumberOfLogicalProcessors, CurrentClockSpeed, MaxClockSpeed, CurrentVoltage | ConvertTo-Json"
   );
   if (!data) return null;
+  const list = Array.isArray(data) ? data : [data];
+  const primary = list[0] || {};
   return {
-    vendor: data.Manufacturer || null,
-    model: data.Name || null,
-    cores: data.NumberOfLogicalProcessors || data.NumberOfCores || null,
-    currentClockMHz: data.CurrentClockSpeed || data.MaxClockSpeed || null,
-    voltage: data.CurrentVoltage || null
+    vendor: primary.Manufacturer || null,
+    model: primary.Name || null,
+    cores: primary.NumberOfLogicalProcessors || primary.NumberOfCores || null,
+    currentClockMHz: primary.CurrentClockSpeed || primary.MaxClockSpeed || null,
+    voltage: primary.CurrentVoltage || null,
+    packageCount: list.length,
+    packages: list.map((cpu) => cpu.Name).filter(Boolean)
   };
 }
 
@@ -313,12 +376,18 @@ async function getWindowsMemoryModules() {
 
 async function getWindowsGpuDetails() {
   const data = await runPowerShellJson(
-    "Get-CimInstance Win32_VideoController | Select-Object -First 1 Name, AdapterCompatibility, VideoProcessor | ConvertTo-Json"
+    "Get-CimInstance Win32_VideoController | Select-Object Name, AdapterCompatibility, VideoProcessor | ConvertTo-Json"
   );
   if (!data) return null;
+  const list = Array.isArray(data) ? data : [data];
+  const primary = list[0] || {};
   return {
-    vendor: data.AdapterCompatibility || null,
-    chip: data.VideoProcessor || data.Name || null
+    vendor: primary.AdapterCompatibility || null,
+    chip: primary.VideoProcessor || primary.Name || null,
+    deviceCount: list.length,
+    devices: list
+      .map((gpu) => gpu.VideoProcessor || gpu.Name || gpu.AdapterCompatibility)
+      .filter(Boolean)
   };
 }
 
@@ -326,6 +395,181 @@ function extractVersion(output) {
   if (!output) return null;
   const lines = output.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
   return lines.length ? lines[0] : null;
+}
+
+function parseSizeToGb(value) {
+  if (!value) return null;
+  const match = String(value).match(/([\d.]+)\s*(TB|GB|MB)/i);
+  if (!match) return null;
+  const num = Number(match[1]);
+  if (!Number.isFinite(num)) return null;
+  const unit = match[2].toUpperCase();
+  if (unit === "TB") return num * 1024;
+  if (unit === "MB") return num / 1024;
+  return num;
+}
+
+function computeHealthScore(diag, approach = "extensive") {
+  let score = 100;
+  const missingDeps = Array.isArray(diag?.dependencies)
+    ? diag.dependencies.filter((item) => !item.present).map((item) => item.name)
+    : [];
+  const missingSoftware = Array.isArray(diag?.software)
+    ? diag.software.filter((item) => !item.present).map((item) => item.name)
+    : [];
+  const cliEntries = diag?.cli ? Object.entries(diag.cli) : [];
+  const missingCliCount = cliEntries.filter(([, info]) => info?.ok === false).length;
+  const totalGb = parseSizeToGb(diag?.memory?.total);
+  const pingMs = Number(diag?.internet?.pingMs);
+  const downloadMbps = Number(diag?.internet?.downloadMbps);
+
+  score -= Math.min(30, missingDeps.length * 5);
+  score -= Math.min(10, missingSoftware.length * 2);
+  score -= Math.min(15, missingCliCount * 3);
+
+  if (Number.isFinite(totalGb)) {
+    if (totalGb < 8) score -= 15;
+    else if (totalGb < 16) score -= 8;
+  }
+
+  if (approach !== "brief") {
+    if (diag?.internet?.ok === false) score -= 10;
+    if (Number.isFinite(pingMs) && pingMs > 100) score -= 5;
+    if (Number.isFinite(downloadMbps) && downloadMbps > 0 && downloadMbps < 25) score -= 5;
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  return score;
+}
+
+function getSuggestionsPlain(diag, approach = "extensive") {
+  const suggestions = [];
+  if (!diag) return suggestions;
+  const addSuggestion = (text) => {
+    if (!suggestions.includes(text)) suggestions.push(text);
+  };
+
+  if (approach === "brief") {
+    addSuggestion("Run the brief checklist and fix the top priorities.");
+  } else {
+    addSuggestion("Run the extensive checklist and fix the top priorities.");
+  }
+
+  const platform = diag?.os?.platform;
+  const installedSoftwareEntries = (diag?.software || []).filter((item) => item?.present);
+  const installedSoftware = installedSoftwareEntries.map((item) => String(item.name || "").toLowerCase());
+  const hasSoftware = (needle) => installedSoftware.some((name) => name.includes(needle));
+  const hasSoftwareExact = (name) =>
+    installedSoftwareEntries.some((item) => String(item.name || "") === name);
+  const installedDeps = (diag?.dependencies || [])
+    .filter((item) => item?.present)
+    .map((item) => String(item.name || "").toLowerCase());
+  const hasDependency = (needle) => installedDeps.some((name) => name.includes(needle));
+
+  const totalMem = Number(diag?.memory?.total?.replace(/[^\d.]/g, ""));
+  const freeMem = Number(diag?.memory?.free?.replace(/[^\d.]/g, ""));
+  if (Number.isFinite(totalMem) && Number.isFinite(freeMem) && totalMem > 0) {
+    const freeRatio = freeMem / totalMem;
+    const usedRatio = 1 - freeRatio;
+    if (freeRatio < 0.2) addSuggestion("Memory is low: close heavy apps or add RAM.");
+    if (usedRatio >= 0.9) addSuggestion("Memory usage is very high: reduce background apps.");
+    else if (usedRatio >= 0.8) addSuggestion("Memory usage is high: trim startup apps.");
+    addSuggestion("Reserve memory for active work (browser, IDE, build tools).");
+  }
+
+  const loadAvg = diag?.cpu?.loadAvg;
+  const cores = Number(diag?.cpu?.cores);
+  if (Array.isArray(loadAvg) && loadAvg.length > 0 && Number.isFinite(cores)) {
+    if (loadAvg[0] > cores) addSuggestion("CPU load is high: check background tasks.");
+  }
+
+  const latency = Number(diag?.internet?.pingMs);
+  if (diag?.internet?.ok === false) {
+    addSuggestion("Internet test failed: retry on a stable connection.");
+  } else if (Number.isFinite(latency) && latency > 200) {
+    addSuggestion("High internet latency: check router and DNS.");
+  }
+
+  if (diag?.os?.updateStatus === "updates_available") {
+    addSuggestion("OS updates are available: install them.");
+  }
+
+  if (!diag?.gpu) {
+    addSuggestion("GPU details are missing: check drivers.");
+  }
+
+  if (Number.isFinite(diag?.memory?.intellijCapMb) || (diag?.memory?.alternativeIdeCaps || []).length > 0) {
+    addSuggestion("IDE memory caps detected: tune them for large projects.");
+  }
+
+  const wifiSignal = diag?.network?.wifi?.signal;
+  if (wifiSignal) {
+    const signalText = String(wifiSignal);
+    const percentMatch = signalText.match(/(\d+)\s*%/);
+    if (percentMatch && Number(percentMatch[1]) < 60) addSuggestion("Wi-Fi signal is weak.");
+    const rssi = Number(signalText.replace(/[^\d.-]/g, ""));
+    if (Number.isFinite(rssi) && rssi < 0 && rssi <= -70) addSuggestion("Wi-Fi RSSI is weak.");
+  }
+
+  const powerPlan = String(diag?.systemSettings?.powerPlan || diag?.systemSettings?.powerSummary || "");
+  if (platform === "win32" && powerPlan && /balanced|power saver|power saving/i.test(powerPlan)) {
+    addSuggestion("Power plan is not high performance: switch if needed.");
+  }
+
+  if (hasSoftware("visual studio code")) addSuggestion("Review VS Code extensions and keep them lean.");
+  const hasJetBrainsIde =
+    hasSoftware("intellij") ||
+    hasSoftware("pycharm") ||
+    hasSoftware("webstorm") ||
+    hasSoftware("rider") ||
+    hasSoftware("clion") ||
+    hasSoftware("datagrip") ||
+    hasSoftware("android studio");
+  if (hasJetBrainsIde) addSuggestion("Tune JetBrains IDE settings (indexes, memory, plugins).");
+  if (hasSoftwareExact("Visual Studio")) addSuggestion("Enable parallel builds in Visual Studio.");
+  if (hasSoftware("xcode")) addSuggestion("Clear Xcode DerivedData regularly.");
+  if (hasSoftware("android studio")) addSuggestion("Enable hardware acceleration for Android emulators.");
+
+  if (hasDependency("javascript") || hasDependency("node")) addSuggestion("Use Node LTS for stability.");
+  if (hasDependency("typescript")) addSuggestion("Enable TypeScript incremental builds.");
+  if (hasDependency("python")) addSuggestion("Use Python virtual environments per project.");
+  if (hasDependency("java")) addSuggestion("Use a current Java LTS version.");
+  if (hasDependency("docker")) {
+    addSuggestion(platform === "win32" ? "Tune Docker Desktop resources on Windows." : "Tune Docker resources on macOS.");
+  }
+
+  let finalSuggestions = suggestions;
+  if (approach === "brief") finalSuggestions = suggestions.slice(0, 4);
+
+  if (approach === "extensive") {
+    const checklist = [
+      "Update OS drivers",
+      "Review power plan",
+      "Trim startup apps",
+      "Free disk space",
+      "Use SSD where possible",
+      "Reduce heavy visual effects",
+      "Review antivirus impact",
+      "Improve Wi-Fi stability",
+      "Check DNS settings",
+      "Tune browser performance",
+      "Enable hardware acceleration",
+      "Verify CLI tools",
+      "Reboot after updates"
+    ];
+    finalSuggestions = finalSuggestions.concat(checklist);
+  }
+
+  if (approach === "extensive" && finalSuggestions.length) {
+    const impact = Math.min(30, 5 + finalSuggestions.length * 3);
+    finalSuggestions = [
+      ...finalSuggestions,
+      `Potential improvement: ${impact}-${Math.min(40, impact + 10)}%`
+    ];
+  }
+
+  if (finalSuggestions.length === 0) finalSuggestions.push("No major issues detected.");
+  return finalSuggestions;
 }
 
 function checkCommand(cmd, args) {
@@ -610,6 +854,9 @@ async function collectDiagnostics(options) {
   const speeds = cpuInfo.map((cpu) => cpu.speed).filter((speed) => Number.isFinite(speed));
   const totalSpeedMHz = speeds.reduce((sum, speed) => sum + speed, 0);
   const totalSpeedGHz = totalSpeedMHz ? totalSpeedMHz / 1000 : null;
+  const gpuDevices = Array.isArray(gpuInfo?.gpuDevice)
+    ? gpuInfo.gpuDevice.map((device) => device.deviceString || device.name).filter(Boolean)
+    : [];
 
   const diag = {
     timestamp: new Date().toISOString(),
@@ -626,6 +873,8 @@ async function collectDiagnostics(options) {
       vendor: windowsCpu?.vendor || null,
       model: windowsCpu?.model || cpuInfo?.[0]?.model || "n/a",
       cores: windowsCpu?.cores || cpuInfo.length,
+      packageCount: windowsCpu?.packageCount || null,
+      packages: windowsCpu?.packages || null,
       totalSpeedMHz: totalSpeedMHz || null,
       totalSpeedGHz: totalSpeedGHz ? Number(totalSpeedGHz.toFixed(2)) : null,
       voltage: windowsCpu?.voltage || null,
@@ -660,6 +909,8 @@ async function collectDiagnostics(options) {
     vendor: windowsGpu?.vendor || detectGpuVendor(summarizeGpu(gpuInfo).name)?.name || null,
     chip: windowsGpu?.chip || summarizeGpu(gpuInfo).name || null,
     driverVersion: windowsGpu?.driverVersion || null,
+    deviceCount: windowsGpu?.deviceCount || (gpuDevices.length || null),
+    devices: windowsGpu?.devices || (gpuDevices.length ? gpuDevices : null),
     cores: null,
     speedMHz: null,
     speedGHz: null,
@@ -684,21 +935,31 @@ async function collectDiagnostics(options) {
       error: err.message || String(err)
     }));
     diag.internet = {
-      testUrl: "https://www.speedtest.net/",
+      testUrl: "https://speed.fastly.com/ + https://speedtest.akamai.com/",
       ok: speedtest.ok,
       downloadMbps: speedtest.downloadMbps || null,
       uploadMbps: speedtest.uploadMbps || null,
       pingMs: speedtest.pingMs || null,
-      error: speedtest.error || null
+      error: speedtest.error || null,
+      errorCode: speedtest.errorCode || null,
+      note: speedtest.note || null,
+      noteCode: speedtest.noteCode || null,
+      sources: speedtest.sources || null,
+      sourceCount: speedtest.sourceCount || null
     };
   } else {
     diag.internet = {
-      testUrl: "https://www.speedtest.net/",
+      testUrl: "https://speed.fastly.com/ + https://speedtest.akamai.com/",
       ok: null,
       downloadMbps: null,
       uploadMbps: null,
       pingMs: null,
-      error: "Skipped in brief mode"
+      error: "Skipped in brief mode",
+      errorCode: "note.skipped",
+      note: null,
+      noteCode: null,
+      sources: null,
+      sourceCount: null
     };
   }
 
@@ -747,95 +1008,156 @@ async function collectDiagnostics(options) {
 }
 
 function runSpeedtestNet() {
-  return new Promise((resolve) => {
-    const speedWindow = new BrowserWindow({
-      show: false,
-      width: 800,
-      height: 600,
-      backgroundColor: "#0f1115",
-      webPreferences: {
-        contextIsolation: true,
-        nodeIntegration: false,
-        sandbox: true,
-        backgroundThrottling: false
-      }
+  const measurePing = (url, timeoutMs) =>
+    new Promise((resolve) => {
+      const start = process.hrtime.bigint();
+      const req = https.request(url, { method: "GET" }, (res) => {
+        res.on("data", () => {});
+        res.on("end", () => {
+          const end = process.hrtime.bigint();
+          const ms = Number(end - start) / 1e6;
+          resolve({ ms: Number.isFinite(ms) ? ms : null, captive: false });
+        });
+      });
+      req.on("error", () => resolve({ ms: null, captive: false }));
+      req.setTimeout(timeoutMs, () => {
+        req.destroy();
+        resolve({ ms: null, captive: false });
+      });
+      req.end();
     });
 
-    speedWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-
-    const timeout = setTimeout(() => {
-      speedWindow.close();
-      resolve({ ok: false, error: "speedtest timeout" });
-    }, 60000);
-
-    const pollResults = async () => {
-      try {
-        const data = await speedWindow.webContents.executeJavaScript(
-          `
-          (() => {
-            const pick = (selectors) => {
-              for (const sel of selectors) {
-                const el = document.querySelector(sel);
-                if (el && el.textContent) return el.textContent.trim();
-              }
-              return null;
-            };
-            const download = pick([".download-speed", "span.download-speed", "[data-testid='download-speed']"]);
-            const upload = pick([".upload-speed", "span.upload-speed", "[data-testid='upload-speed']"]);
-            const ping = pick([".ping-speed", "span.ping-speed", "[data-testid='ping-speed']"]);
-            return { download, upload, ping };
-          })()
-        `,
-          true
-        );
-
-        if (data?.download && data?.upload && data?.ping) {
-          clearTimeout(timeout);
-          speedWindow.close();
-          const toNumber = (value) => {
-            const num = Number(String(value).replace(/[^\d.]/g, ""));
-            return Number.isFinite(num) ? num : null;
-          };
-          resolve({
-            ok: true,
-            downloadMbps: toNumber(data.download),
-            uploadMbps: toNumber(data.upload),
-            pingMs: toNumber(data.ping)
+  const measureDownload = (url, bytes, timeoutMs) =>
+    new Promise((resolve) => {
+      const start = process.hrtime.bigint();
+      let total = 0;
+      const req = https.request(
+        url,
+        { method: "GET", headers: { Range: `bytes=0-${bytes - 1}` } },
+        (res) => {
+          const contentType = String(res.headers["content-type"] || "");
+          const isCaptive = Boolean(
+            (res.statusCode && res.statusCode >= 300 && res.statusCode < 400) ||
+            contentType.toLowerCase().includes("text/html")
+          );
+          if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+            res.resume();
+            resolve({ mbps: null, captive: isCaptive });
+            return;
+          }
+          res.on("data", (chunk) => {
+            total += chunk.length;
           });
+          res.on("end", () => {
+            const end = process.hrtime.bigint();
+            const seconds = Number(end - start) / 1e9;
+            if (!Number.isFinite(seconds) || seconds <= 0) {
+              resolve({ mbps: null, captive: isCaptive });
+              return;
+            }
+            const mbps = (total * 8) / seconds / 1e6;
+            resolve({ mbps: Number.isFinite(mbps) ? mbps : null, captive: isCaptive });
+          });
+        }
+      );
+      req.on("error", () => resolve({ mbps: null, captive: false }));
+      req.setTimeout(timeoutMs, () => {
+        req.destroy();
+        resolve({ mbps: null, captive: false });
+      });
+      req.end();
+    });
+
+  const measureUpload = (url, bytes, timeoutMs) =>
+    new Promise((resolve) => {
+      const payload = Buffer.alloc(bytes, "a");
+      const start = process.hrtime.bigint();
+      const req = https.request(url, { method: "POST", headers: { "Content-Length": payload.length } }, (res) => {
+        const contentType = String(res.headers["content-type"] || "");
+        const isCaptive = Boolean(
+          (res.statusCode && res.statusCode >= 300 && res.statusCode < 400) ||
+          contentType.toLowerCase().includes("text/html")
+        );
+        if (!res.statusCode || res.statusCode < 200 || res.statusCode >= 300) {
+          res.resume();
+          resolve({ mbps: null, captive: isCaptive, statusOk: false });
           return;
         }
-      } catch {
-        // keep polling
-      }
-      setTimeout(pollResults, 1000);
-    };
-
-    speedWindow.webContents.on("did-finish-load", async () => {
-      try {
-        await speedWindow.webContents.executeJavaScript(
-          `
-          (() => {
-            const clickAny = (selectors) => {
-              for (const sel of selectors) {
-                const el = document.querySelector(sel);
-                if (el) { el.click(); return true; }
-              }
-              return false;
-            };
-            clickAny(["#onetrust-accept-btn-handler", "button#accept-privacy", "button.accept"]);
-            clickAny([".start-text", ".start-button a", ".start-button", "[data-testid='start-button']"]);
-          })()
-        `,
-          true
-        );
-      } catch {
-        // ignore
-      }
-      pollResults();
+        res.on("data", () => {});
+        res.on("end", () => {
+          const end = process.hrtime.bigint();
+          const seconds = Number(end - start) / 1e9;
+          if (!Number.isFinite(seconds) || seconds <= 0) {
+            resolve({ mbps: null, captive: isCaptive, statusOk: false });
+            return;
+          }
+          const mbps = (payload.length * 8) / seconds / 1e6;
+          resolve({ mbps: Number.isFinite(mbps) ? mbps : null, captive: isCaptive, statusOk: true });
+        });
+      });
+      req.on("error", () => resolve({ mbps: null, captive: false, statusOk: false }));
+      req.setTimeout(timeoutMs, () => {
+        req.destroy();
+        resolve({ mbps: null, captive: false, statusOk: false });
+      });
+      req.end(payload);
     });
 
-    speedWindow.loadURL("https://www.speedtest.net/");
-  });
+  const measureUploadWithFallback = async (urls, bytes, timeoutMs) => {
+    const list = Array.isArray(urls) && urls.length ? urls : [];
+    let lastResult = { mbps: null, captive: false, statusOk: false };
+    for (const url of list) {
+      // Try each upload endpoint until one succeeds.
+      // Keep the last failure for diagnostics.
+      // eslint-disable-next-line no-await-in-loop
+      const result = await measureUpload(url, bytes, timeoutMs);
+      lastResult = result;
+      if (Number.isFinite(result.mbps) && result.statusOk) {
+        return result;
+      }
+    }
+    return lastResult;
+  };
+
+  const runHost = async (host) => {
+    const ping = await measurePing(host.pingUrl, 5000);
+    const download = await measureDownload(host.downloadUrl, 5 * 1024 * 1024, 15000);
+    const upload = await measureUploadWithFallback(host.uploadUrls, 2 * 1024 * 1024, 15000);
+    const downloadOk = Number.isFinite(download.mbps);
+    const uploadOk = Number.isFinite(upload.mbps) && upload.statusOk;
+    return {
+      name: host.name,
+      pingMs: ping.ms,
+      downloadMbps: download.mbps,
+      uploadMbps: upload.mbps,
+      downloadOk,
+      uploadOk,
+      captive: Boolean(download.captive || upload.captive)
+    };
+  };
+
+  return (async () => {
+    const hosts = [
+      {
+        name: "fastly",
+        pingUrl: "https://speed.fastly.com/",
+        downloadUrl: "https://speed.fastly.com/100MB.bin",
+        uploadUrls: [
+          "https://speed.fastly.com/upload",
+          "https://speed.fastly.com/upload.php"
+        ]
+      },
+      {
+        name: "akamai",
+        pingUrl: "https://www.akamai.com/",
+        downloadUrl: "https://speedtest.akamai.com/100MB.bin",
+        uploadUrls: ["https://speedtest.akamai.com/upload.php"]
+      }
+    ];
+
+    const results = await Promise.all(hosts.map((host) => runHost(host)));
+    return summarizeSpeedtestResults(hosts, results);
+  })();
 }
 
 ipcMain.handle("run-diagnostics", async (_event, options) => {
@@ -872,7 +1194,7 @@ ipcMain.handle("export-results", async (event, payload) => {
   const defaultName = `results_diagnostic_${stamp}.${extension}`;
   const { canceled, filePath } = await dialog.showSaveDialog({
     title: "Save Diagnostics",
-    defaultPath: path.join(app.getPath("documents"), defaultName),
+    defaultPath: path.join(app.getPath("downloads"), defaultName),
     filters: format === "pdf"
       ? [{ name: "PDF", extensions: ["pdf"] }]
       : format === "json"
@@ -883,6 +1205,9 @@ ipcMain.handle("export-results", async (event, payload) => {
   });
 
   if (canceled || !filePath) return { saved: false };
+  if (isNetworkPath(filePath)) {
+    return { saved: false, error: "Network paths are not allowed for exports." };
+  }
 
   if (format === "txt") {
     const normalizedText = String(contentText || "").replace(/\r?\n/g, os.EOL);
@@ -941,6 +1266,9 @@ ipcMain.handle("save-baseline", async (_event, payload) => {
     filters: [{ name: "JSON", extensions: ["json"] }]
   });
   if (canceled || !filePath) return { saved: false };
+  if (isNetworkPath(filePath)) {
+    return { saved: false, error: "Network paths are not allowed for baselines." };
+  }
   const data = {
     baselineMeta: {
       createdAt: new Date().toISOString(),
@@ -1016,7 +1344,20 @@ app.whenReady().then(async () => {
     return;
   }
 
-  const payload = { diagnostics };
+  const suggestions = includeOptimization
+    ? getSuggestionsPlain(diagnostics, approach)
+    : ["Optimization disabled by --no-optimization"];
+  const summary = {
+    healthScore: computeHealthScore(diagnostics, approach),
+    topPriorities: includeOptimization ? suggestions.slice(0, 3) : ["Optimization disabled"]
+  };
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    approach,
+    summary,
+    suggestions,
+    diagnostics
+  };
   if (baselinePath) {
     try {
       const raw = await require("fs").promises.readFile(baselinePath, "utf8");
@@ -1028,31 +1369,15 @@ app.whenReady().then(async () => {
     }
   }
 
-  const toCsv = (obj) => {
-    const rows = [["path", "value"]];
-    const flatten = (value, prefix = "") => {
-      if (Array.isArray(value)) {
-        rows.push([prefix, value.join("; ")]);
-        return;
-      }
-      if (value && typeof value === "object") {
-        Object.keys(value).forEach((key) => flatten(value[key], prefix ? `${prefix}.${key}` : key));
-        return;
-      }
-      rows.push([prefix, value ?? ""]);
-    };
-    flatten(obj);
-    return rows
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
-      .join(os.EOL);
-  };
-
   const output = format === "csv"
-    ? toCsv(payload)
+    ? formatCsvExport(payload, os.EOL)
     : JSON.stringify(payload, null, 2);
 
   try {
     if (outputPath) {
+      if (isNetworkPath(outputPath)) {
+        throw new Error("Network paths are not allowed for exports.");
+      }
       await require("fs").promises.writeFile(outputPath, output, "utf8");
     } else {
       console.log(output);

@@ -4,7 +4,7 @@
 
 Know your setup. Fix the gaps. Feel the "yes! yes!" when you code, for Windows and macOS.
 
-This tool shows what is strong, what is missing, and what is holding you back across hardware, software, IDE, languages, and Wi-Fi/LAN.
+This tool shows what is strong, what is missing, and what is holding you back across hardware, software, IDEs, languages, and Wi-Fi/LAN.
 It then turns that insight into clear, practical suggestions and an exportable checklist so you can improve step by step.
 
 Main goal: get the most from your setup and keep that smooth, fast "yes! yes!" energy when you start building.
@@ -48,8 +48,12 @@ At a certain point, you want to know the real state of your setup, what is missi
 - Results you can act on.
   - Brief mode: a fast overview plus focused fixes for weak spots and missing dependencies.
   - Extensive mode: deeper detail and broader tuning suggestions.
-  - Export to TXT, PDF, JSON, or CSV with timestamped filenames: `results_diagnostic_DDMMYY`.
-  - Shows "n/a" when the OS/driver cannot provide a value.
+- Export to TXT, PDF, JSON, or CSV with timestamped filenames: `results_diagnostic_DDMMYY`.
+- Shows "n/a" when the OS/driver cannot provide a value.
+- Exports are saved locally (default: your Downloads folder) and are not sent anywhere.
+- No telemetry or upload of diagnostics; only the optional speed test sends synthetic traffic to test endpoints.
+- Network paths are blocked for exports/baselines to keep data local.
+- Extra attention was paid to keep exports local-only.
 - Quick summary.
   - Health score and top priorities to focus on first.
 - Baseline checks.
@@ -91,18 +95,6 @@ The mac helper script generates `assets/icon-mac.icns` from `assets/icon-mac.png
 
 ## Manual step
 - Add GitHub Topics in repo settings (e.g., diagnostics, electron, windows, macos, developer-tools).
-
-## CLI mode (optional)
-Run diagnostics without the UI:
-```bash
-npm run cli -- --approach=brief --format=json
-```
-Common flags:
-- `--format=json|csv`
-- `--output=PATH`
-- `--baseline=PATH`
-- `--approach=brief|extensive`
-- `--no-software`, `--no-dependencies`, `--no-optimization`
 
 ## Contributing
 See `CONTRIBUTING.md`.

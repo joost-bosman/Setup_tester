@@ -3,19 +3,17 @@
 ## Table of Contents / Inhoudsopgave
 - English (UK)
 - Nederlands
-- ??????
-- ???????
+- Hindi
+- Arabic
 - Polski
-- ??????????
-- Fran�ais
-- Portugu�s
-- Espa�ol
+- Ukrainian
+- Français
+- Português
+- Español
 - Italiano
 - Bahasa Indonesia
 
-
 ---
-
 ## English (UK)
 
 ### Quick Start (Step-by-step)
@@ -53,6 +51,10 @@
 
 ### Privacy & network
 - Diagnostics are local.
+- Exports are saved locally (default: your Downloads folder) and are not sent anywhere.
+- Network paths are blocked for exports/baselines to keep data local.
+- Extra attention was paid to keep exports local-only.
+- No telemetry or upload of diagnostics; only the optional speed test sends synthetic traffic to test endpoints.
 - Language auto-detect uses IP to infer country; nothing is stored.
 
 ### Download optimization tips (for better adoption)
@@ -84,18 +86,22 @@
 
 ### Wat de tool controleert
 - OS, CPU, RAM, GPU, internetsnelheid/latentie
-- Optioneel: ge�nstalleerde IDE's, tools en talen
+- Optioneel: geïnstalleerde IDE's, tools en talen
 - Optioneel: netwerkdetails en energieplan (uitgebreid)
 
 ### Suggestielogica
 - Kort: gericht op snel kunnen starten.
-- Uitgebreid: gericht op maximale prestaties en effici�ntie.
+- Uitgebreid: gericht op maximale prestaties en efficiëntie.
 
 ### Export
-- TXT en PDF bevatten resultaten + suggesties.
+- TXT, PDF, JSON en CSV bevatten resultaten + suggesties.
 
 ### Privacy & netwerk
 - Diagnoses zijn lokaal.
+- Exports worden lokaal opgeslagen (standaard: je Downloads-map) en worden nergens heen gestuurd.
+- Netwerkpaden zijn geblokkeerd voor exports/baselines om data lokaal te houden.
+- Er is extra aandacht besteed aan het lokaal houden van exports.
+- Geen telemetrie of upload van diagnoses; alleen de optionele snelheidstest stuurt synthetisch testverkeer naar test-endpoints.
 - Taaldetectie gebruikt IP voor regio; er wordt niets opgeslagen.
 
 ### Download-optimalisatietips
@@ -107,213 +113,244 @@
 
 ---
 
-## ??????
+## Hindi
 
-### ?????? ?????? (?????-???-?????)
-1. ???? ??????? ?? ???? ??????
-2. **?????????** ?????? ????? ?? ???, **???????** ?????? ???????? ?? ??? ??????
-3. (????????) **Software/IDE** ?? **Tools & Languages** ????? ?? ??? ????? ?????
-4. **?????????????? ?????** ?? ????? ?????
-5. **???????????? ?????** ????? ?? ????? ?? ?? TXT/PDF ????????? ?????
+### त्वरित शुरुआत (चरण-दर-चरण)
+1. पहली स्क्रीन पर अपनी भाषा चुनें।
+2. जल्दी जाँच के लिए **Brief** या अधिकतम प्रदर्शन के लिए **Extensive** चुनें।
+3. (वैकल्पिक) अगर आप वे स्कैन चाहते हैं तो **Software/IDEs** और **Tools & Languages** सक्षम करें।
+4. **Run diagnostics** पर क्लिक करें और परिणामों की प्रतीक्षा करें।
+5. **Optimization suggestions** देखें और आवश्यकता हो तो TXT/PDF में निर्यात करें।
 
-### ???? (???????)
+### प्रवाह (दृश्य)
 ```
-[????] -> [??? + ?????????] -> [??????????????] -> [?????? + ?????] -> [?????????]
+[Choose Language] -> [Select Mode + Extras] -> [Run Diagnostics] -> [Results + Suggestions] -> [Export]
 ```
 
-### ??? ???? ?????? ??
-- OS, CPU, RAM, GPU, ??????? ?????/???????
-- ????????: IDEs, ?????, ??????
-- ????????: ???????/???? ????? (???????)
+### टूल क्या जाँचता है
+- OS, CPU, RAM, GPU, इंटरनेट गति/लेटेंसी
+- वैकल्पिक: इंस्टॉल किए गए IDEs, टूल्स और भाषाएँ
+- वैकल्पिक: नेटवर्क विवरण और पावर प्लान (extensive मोड)
 
-### ????? ?????
-- ?????????: ??? ???? ???? ?? ?????
-- ???????: ?????? ????????/?????? ?? ?????
+### सुझावों का तर्क
+- Brief मोड: काम शुरू करने की तत्परता पर फोकस।
+- Extensive मोड: प्रदर्शन और दक्षता बढ़ाने पर फोकस।
 
-### ?????????
-- TXT/PDF ??? ?????? + ????? ????? ???? ????
+### Export
+- TXT, PDF, JSON और CSV exports में results + suggestions शामिल होते हैं।
+- फ़ाइल नाम समय-स्टैम्प के साथ बनते हैं।
 
-### ?????????
-- ?????????????? ??????? ????
-- ???? ????? IP ?? ??? ?????? ???? ??; ???? ????? ???? ?????
+### सारांश और बेसलाइन
+- हर रन में health score और top priorities शामिल होते हैं।
+- बेसलाइन सेव करें और बाद की runs से तुलना करें।
 
-### ??????? ????????????? ?????
-- ?????? ??????? ?? ???????????
-- ???? ?? ???? ??? ??? ?????????
-- README ??? ???? "???? ??? ?????" ?????
-- ???? ?? ?? portable + installer ???????
-- integrity ?? ??? hash ???????? ?????
+### गोपनीयता और नेटवर्क
+- Diagnostics स्थानीय हैं।
+- Exports स्थानीय रूप से सेव होते हैं (डिफ़ॉल्ट: आपका Downloads फ़ोल्डर) और कहीं नहीं भेजे जाते।
+- डेटा को स्थानीय रखने के लिए exports/baselines पर नेटवर्क पाथ ब्लॉक होते हैं।
+- कोई telemetry या diagnostics upload नहीं; केवल वैकल्पिक speed test टेस्ट endpoints पर synthetic ट्रैफ़िक भेजता है।
+- भाषा auto-detect के लिए IP region का उपयोग होता है; कुछ भी स्टोर नहीं होता।
+
+### Download optimization tips
+- स्पष्ट changelog और screenshots दें।
+- Installers छोटे और signed रखें।
+- README में छोटा "first run" guide जोड़ें।
+- जहाँ संभव हो portable और installer दोनों विकल्प दें।
+- integrity के लिए hashes प्रकाशित करें।
 
 ---
+## Arabic
 
-## ???????
+### بدء سريع (خطوة بخطوة)
+1. اختر لغتك في الشاشة الأولى.
+2. اختر **Brief** للاستعداد السريع أو **Extensive** لأقصى فحوصات الأداء.
+3. (اختياري) فعِّل **Software/IDEs** و **Tools & Languages** إذا كنت تريد هذه الفحوصات.
+4. انقر **Run diagnostics** وانتظر النتائج.
+5. راجع **Optimization suggestions** وقم بالتصدير إلى TXT/PDF عند الحاجة.
 
-### ??? ???? (???? ?????)
-1. ???? ????? ?? ?????? ??????.
-2. ???? **?????** ???????? ??????? ?? **????** ????? ????.
-3. (???????) ???? **???????/IDE** ? **??????? ???????**.
-4. ???? **????? ???????** ?????? ???????.
-5. ???? **???????? ???????** ????? ??? TXT/PDF ??? ??????.
-
-### ?????? (????)
+### المسار (تصويري)
 ```
-[?????? ?????] -> [????? + ????????] -> [???????] -> [??????? + ??????????] -> [???????]
+[Choose Language] -> [Select Mode + Extras] -> [Run Diagnostics] -> [Results + Suggestions] -> [Export]
 ```
 
-### ?? ???? ????? ??????
-- OS, CPU, RAM, GPU, ???? ????????/??????
-- ???????: IDEs ???????? ???????
-- ???????: ?????? ?????? ???? ?????? (????)
+### ما الذي يفحصه الأداة
+- OS, CPU, RAM, GPU، سرعة الإنترنت/الكمون
+- اختياري: IDEs، الأدوات واللغات المثبتة
+- اختياري: تفاصيل الشبكة وخطة الطاقة (وضع extensive)
 
-### ???? ??????????
-- ?????: ?????? ????? ??????.
-- ????: ???? ?????? ????.
+### منطق الاقتراحات
+- وضع Brief: يركّز على الجاهزية للبدء.
+- وضع Extensive: يركّز على تحسين الأداء والكفاءة.
 
-### ???????
-- TXT/PDF ??????? ??????? ???????????.
+### Export
+- تشمل صادرات TXT وPDF وJSON وCSV النتائج + الاقتراحات.
+- أسماء الملفات تحمل طابعًا زمنيًا.
 
-### ????????
-- ??????? ????.
-- ??? ????? ????? ??? IP ?????? ??????? ?? ??? ???????.
+### الملخص وخط الأساس
+- كل تشغيل يتضمن health score وأهم الأولويات.
+- احفظ baseline وقارنه مع تشغيلات لاحقة لرصد التغييرات.
 
-### ????? ????? ???????
-- ??? ??????? ???? ?????? ????.
-- ?????? ????? ??????.
-- ???? "??? ???????" ???? ?? README.
-- ?????? portable ? installer ?? ????.
-- ??? hashes ??????.
+### الخصوصية والشبكة
+- التشخيصات محلية.
+- يتم حفظ الصادرات محليًا (افتراضيًا: مجلد Downloads) ولا يتم إرسالها إلى أي مكان.
+- يتم حظر مسارات الشبكة للصادرات/الأساسيات للحفاظ على بقاء البيانات محليًا.
+- لا توجد telemetry أو رفع للتشخيصات؛ فقط اختبار السرعة الاختياري يرسل حركة اصطناعية إلى نقاط الاختبار.
+- الكشف التلقائي للغة يستخدم منطقة الـ IP؛ ولا يتم حفظ أي شيء.
+
+### نصائح تحسين التنزيل
+- قدّم changelog واضحًا ولقطات شاشة.
+- اجعل installers صغيرة وموقَّعة.
+- أضف دليل "first run" قصيرًا في README.
+- قدّم خيارات portable و installer عندما يكون ذلك ممكنًا.
+- انشر hashes للتحقق من السلامة.
 
 ---
-
 ## Polski
 
 ### Szybki start (krok po kroku)
-1. Wybierz jezyk na pierwszym ekranie.
-2. Wybierz **Kr�tki** dla gotowosci, **Rozszerzony** dla maksymalnej wydajnosci.
-3. (Opcjonalnie) Wlacz **Software/IDEs** i **Narzedzia i jezyki**.
-4. Kliknij **Uruchom diagnostyke**.
-5. Sprawdz **Sugestie optymalizacji** i eksportuj do TXT/PDF.
+1. Wybierz język na pierwszym ekranie.
+2. Wybierz **Brief** dla szybkiej gotowości lub **Extensive** dla maksymalnych testów wydajności.
+3. (Opcjonalnie) Włącz **Software/IDEs** i **Tools & Languages**, jeśli chcesz tych skanów.
+4. Kliknij **Run diagnostics** i poczekaj na wyniki.
+5. Sprawdź **Optimization suggestions** i wyeksportuj do TXT/PDF, jeśli potrzebujesz.
 
-### Przeplyw (wizualnie)
+### Przepływ (wizualnie)
 ```
-[Jezyk] -> [Tryb + Dodatki] -> [Diagnostyka] -> [Wyniki + Sugestie] -> [Eksport]
+[Choose Language] -> [Select Mode + Extras] -> [Run Diagnostics] -> [Results + Suggestions] -> [Export]
 ```
 
-### Co sprawdza narzedzie
-- OS, CPU, RAM, GPU, internet
-- Opcjonalnie: IDE, narzedzia, jezyki
-- Opcjonalnie: siec i plan zasilania (rozszerzony)
+### Co sprawdza narzędzie
+- OS, CPU, RAM, GPU, prędkość/latencja internetu
+- Opcjonalnie: zainstalowane IDE, narzędzia i języki
+- Opcjonalnie: szczegóły sieci i plan zasilania (tryb extensive)
 
 ### Logika sugestii
-- Kr�tki: gotowosc do pracy.
-- Rozszerzony: maksymalna wydajnosc i efektywnosc.
+- Tryb Brief: skupia się na gotowości do pracy.
+- Tryb Extensive: skupia się na wydajności i efektywności.
 
-### Eksport
-- TXT/PDF zawiera wyniki + sugestie.
+### Export
+- Eksporty TXT, PDF, JSON i CSV zawierają wyniki + sugestie.
+- Nazwy plików zawierają znacznik czasu.
 
-### Prywatnosc
-- Diagnostyka lokalna.
-- Autodetekcja jezyka korzysta z IP; nic nie jest zapisywane.
+### Podsumowanie i baseline
+- Każde uruchomienie zawiera health score i top priorities.
+- Zapisz baseline i porównuj z kolejnymi uruchomieniami.
 
-### Wskaz�wki pobierania
-- Jasny changelog i screeny.
-- Male, podpisane instalatory.
-- Kr�tki przewodnik "pierwsze uruchomienie".
-- Opcje portable + installer.
-- Publikuj hashe.
+### Prywatność i sieć
+- Diagnostyka jest lokalna.
+- Eksporty są zapisywane lokalnie (domyślnie: folder Downloads) i nigdzie nie są wysyłane.
+- Ścieżki sieciowe są blokowane dla eksportów/baselines, aby dane pozostały lokalnie.
+- Brak telemetry lub wysyłania diagnostyki; tylko opcjonalny test prędkości wysyła ruch testowy do endpointów.
+- Automatyczne wykrywanie języka używa regionu IP; nic nie jest zapisywane.
 
----
-
-## ??????????
-
-### ??????? ????? (???? ?? ??????)
-1. ??????? ???? ?? ??????? ??????.
-2. ??????? **????????** ??? ??????? ?????????? ??? **??????????** ??? ?????????.
-3. (???????) ????????? **??/IDE** ? **??????????? ? ????**.
-4. ????????? **????????? ???????????**.
-5. ??????????? **?????????? ???????????** ? ??????????? TXT/PDF.
-
-### ????? (?????????)
-```
-[????] -> [????? + ?????????] -> [???????????] -> [?????????? + ??????????] -> [???????]
-```
-
-### ?? ????????? ??????????
-- OS, CPU, RAM, GPU, ????????
-- ???????: IDE, ???????????, ????
-- ???????: ?????? ?? ???? ???????? (??????????)
-
-### ?????? ??????????
-- ????????: ?????????? ?? ??????.
-- ??????????: ???????? ??????????????.
-
-### ???????
-- TXT/PDF ??????? ?????????? + ??????????.
-
-### ???????????
-- ??????????? ????????.
-- ?????????????? ???? ???????????? IP; ?????? ?? ????????????.
-
-### ?????? ??? ????????????
-- ?????? changelog ? ?????????.
-- ????????, ????????? ???????????.
-- ???????? ???? "?????? ??????".
-- ???????? portable + installer.
-- ?????????? ????.
+### Wskazówki optymalizacji pobierania
+- Zapewnij czytelny changelog i zrzuty ekranu.
+- Utrzymuj installers małe i podpisane.
+- Dodaj krótki przewodnik "first run" w README.
+- Oferuj wersję portable i installer, jeśli to możliwe.
+- Publikuj hashes do weryfikacji integralności.
 
 ---
+## Ukrainian
 
-## Fran�ais
+### Швидкий старт (крок за кроком)
+1. Виберіть мову на першому екрані.
+2. Оберіть **Brief** для швидкої перевірки або **Extensive** для максимальних тестів продуктивності.
+3. (Опційно) Увімкніть **Software/IDEs** і **Tools & Languages**, якщо потрібні ці скани.
+4. Натисніть **Run diagnostics** і зачекайте на результати.
+5. Перегляньте **Optimization suggestions** і за потреби експортуйте у TXT/PDF.
 
-### D�marrage rapide (�tape par �tape)
-1. Choisissez la langue au premier �cran.
-2. **Bref** pour d�marrer vite, **Approfondi** pour le maximum.
+### Потік (візуально)
+```
+[Choose Language] -> [Select Mode + Extras] -> [Run Diagnostics] -> [Results + Suggestions] -> [Export]
+```
+
+### Що перевіряє інструмент
+- OS, CPU, RAM, GPU, швидкість/затримка інтернету
+- Опційно: встановлені IDE, інструменти та мови
+- Опційно: деталі мережі та план живлення (режим extensive)
+
+### Логіка порад
+- Режим Brief: фокус на готовності до роботи.
+- Режим Extensive: фокус на продуктивності та ефективності.
+
+### Export
+- Експорти TXT, PDF, JSON і CSV містять результати + поради.
+- Імена файлів мають часову мітку.
+
+### Підсумок і baseline
+- Кожен запуск містить health score та top priorities.
+- Збережіть baseline і порівнюйте з наступними запусками.
+
+### Приватність і мережа
+- Діагностика локальна.
+- Експорти зберігаються локально (за замовчуванням: папка Downloads) і нікуди не надсилаються.
+- Мережеві шляхи заблоковані для exports/baselines, щоб дані залишалися локально.
+- Немає telemetry чи відправлення діагностики; лише опційний тест швидкості надсилає синтетичний трафік на endpoint-и.
+- Автовизначення мови використовує регіон IP; нічого не зберігається.
+
+### Поради щодо оптимізації завантаження
+- Надайте зрозумілий changelog та скріншоти.
+- Тримайте installers невеликими та підписаними.
+- Додайте короткий "first run" гайд у README.
+- За можливості пропонуйте portable і installer варіанти.
+- Публікуйте hashes для перевірки цілісності.
+
+---
+## Français
+
+### Démarrage rapide (étape par étape)
+1. Choisissez la langue au premier écran.
+2. **Bref** pour démarrer vite, **Approfondi** pour le maximum.
 3. (Optionnel) Activez **Logiciels/IDE** et **Outils & langages**.
 4. Cliquez **Lancer le diagnostic**.
 5. Consultez **Suggestions d'optimisation** et exportez TXT/PDF.
 
 ### Flux (visuel)
 ```
-[Langue] -> [Mode + Extras] -> [Diagnostic] -> [R�sultats + Suggestions] -> [Export]
+[Langue] -> [Mode + Extras] -> [Diagnostic] -> [Résultats + Suggestions] -> [Export]
 ```
 
-### Ce que l'outil v�rifie
+### Ce que l'outil vérifie
 - OS, CPU, RAM, GPU, internet
 - Optionnel: IDE, outils, langages
-- Optionnel: r�seau et plan d'alimentation (approfondi)
+- Optionnel: réseau et plan d'alimentation (approfondi)
 
 ### Logique des suggestions
-- Bref: pr�t � travailler.
-- Approfondi: performance et efficacit� max.
+- Bref: prêt à travailler.
+- Approfondi: performance et efficacité max.
 
 ### Export
-- TXT/PDF incluent r�sultats + suggestions.
+- TXT, PDF, JSON et CSV incluent résultats + suggestions.
 
-### Confidentialit�
+### Confidentialité
 - Diagnostics locaux.
-- D�tection de langue via IP; rien n'est stock�.
+- Les exports sont enregistrés localement (par défaut: votre dossier Téléchargements) et ne sont envoyés nulle part.
+- Les chemins réseau sont bloqués pour les exports/baselines afin de garder les données en local.
+- Pas de télémétrie ni d'upload des diagnostics; seul le test de vitesse optionnel envoie du trafic synthétique vers des endpoints de test.
+- Détection de langue via IP; rien n'est stocké.
 
-### Conseils de t�l�chargement
+### Conseils de téléchargement
 - Changelog clair et captures.
-- Installers compacts et sign�s.
+- Installers compacts et signés.
 - Mini guide "premier lancement".
 - Portable + installer si possible.
 - Publier des hashes.
 
 ---
 
-## Portugu�s
+## Português
 
-### In�cio r�pido (passo a passo)
-1. Escolha o idioma no primeiro ecr�.
-2. **Breve** para rapidez, **Extenso** para m�ximo desempenho.
+### Início rápido (passo a passo)
+1. Escolha o idioma no primeiro ecrã.
+2. **Breve** para rapidez, **Extenso** para máximo desempenho.
 3. (Opcional) Ative **Software/IDEs** e **Ferramentas e linguagens**.
-4. Clique **Executar diagn�stico**.
-5. Veja **Sugest�es de otimiza��o** e exporte TXT/PDF.
+4. Clique **Executar diagnóstico**.
+5. Veja **Sugestões de otimização** e exporte TXT/PDF.
 
 ### Fluxo (visual)
 ```
-[Idioma] -> [Modo + Extras] -> [Diagn�stico] -> [Resultados + Sugest�es] -> [Exporta��o]
+[Idioma] -> [Modo + Extras] -> [Diagnóstico] -> [Resultados + Sugestões] -> [Exportação]
 ```
 
 ### O que a ferramenta verifica
@@ -321,60 +358,66 @@
 - Opcional: IDEs, ferramentas, linguagens
 - Opcional: rede e plano de energia (extenso)
 
-### L�gica das sugest�es
+### Lógica das sugestões
 - Breve: pronto a trabalhar.
-- Extenso: performance m�xima.
+- Extenso: performance máxima.
 
 ### Exportar
-- TXT/PDF incluem resultados + sugest�es.
+- TXT, PDF, JSON e CSV incluem resultados + sugestões.
 
 ### Privacidade
-- Diagn�stico local.
-- Dete��o de idioma via IP; nada � guardado.
+- Diagnóstico local.
+- As exportações são guardadas localmente (por defeito: pasta Transferências) e não são enviadas para lado nenhum.
+- Caminhos de rede estão bloqueados para exportações/baselines para manter os dados locais.
+- Sem telemetria ou upload dos diagnósticos; apenas o teste de velocidade opcional envia tráfego sintético para endpoints de teste.
+- Deteção de idioma via IP; nada é guardado.
 
 ### Dicas de download
 - Changelog claro e screenshots.
 - Instaladores pequenos e assinados.
-- Guia curto "primeira execu��o".
-- Op��es portable + installer.
+- Guia curto "primeira execução".
+- Opções portable + installer.
 - Publicar hashes.
 
 ---
 
-## Espa�ol
+## Español
 
-### Inicio r�pido (paso a paso)
+### Inicio rápido (paso a paso)
 1. Elige el idioma en la primera pantalla.
-2. **Breve** para empezar r�pido, **Extenso** para m�ximo rendimiento.
+2. **Breve** para empezar rápido, **Extenso** para máximo rendimiento.
 3. (Opcional) Activa **Software/IDEs** y **Herramientas e idiomas**.
-4. Haz clic en **Ejecutar diagn�stico**.
-5. Revisa **Sugerencias de optimizaci�n** y exporta TXT/PDF.
+4. Haz clic en **Ejecutar diagnóstico**.
+5. Revisa **Sugerencias de optimización** y exporta TXT/PDF.
 
 ### Flujo (visual)
 ```
-[Idioma] -> [Modo + Extras] -> [Diagn�stico] -> [Resultados + Sugerencias] -> [Exportar]
+[Idioma] -> [Modo + Extras] -> [Diagnóstico] -> [Resultados + Sugerencias] -> [Exportar]
 ```
 
-### Qu� comprueba la herramienta
+### Qué comprueba la herramienta
 - OS, CPU, RAM, GPU, internet
 - Opcional: IDEs, herramientas, idiomas
-- Opcional: red y plan de energ�a (extenso)
+- Opcional: red y plan de energía (extenso)
 
-### L�gica de sugerencias
+### Lógica de sugerencias
 - Breve: listo para trabajar.
-- Extenso: m�ximo rendimiento.
+- Extenso: máximo rendimiento.
 
 ### Exportar
-- TXT/PDF incluyen resultados + sugerencias.
+- TXT, PDF, JSON y CSV incluyen resultados + sugerencias.
 
 ### Privacidad
-- Diagn�sticos locales.
-- Detecci�n de idioma v�a IP; no se guarda nada.
+- Diagnósticos locales.
+- Las exportaciones se guardan localmente (por defecto: tu carpeta Descargas) y no se envían a ningún sitio.
+- Las rutas de red están bloqueadas para exportaciones/baselines para mantener los datos locales.
+- Sin telemetría ni subida de diagnósticos; solo la prueba de velocidad opcional envía tráfico sintético a endpoints de prueba.
+- Detección de idioma vía IP; no se guarda nada.
 
 ### Consejos de descarga
 - Changelog claro y capturas.
-- Instaladores peque�os y firmados.
-- Gu�a breve de "primer uso".
+- Instaladores pequeños y firmados.
+- Guía breve de "primer uso".
 - Opciones portable + installer.
 - Publicar hashes.
 
@@ -391,7 +434,7 @@
 
 ### Flusso (visivo)
 ```
-[Lingua] -> [Modalit� + Extra] -> [Diagnostica] -> [Risultati + Suggerimenti] -> [Export]
+[Lingua] -> [Modalità + Extra] -> [Diagnostica] -> [Risultati + Suggerimenti] -> [Export]
 ```
 
 ### Cosa controlla lo strumento
@@ -404,10 +447,13 @@
 - Estesa: massimo rendimento.
 
 ### Export
-- TXT/PDF includono risultati + suggerimenti.
+- TXT, PDF, JSON e CSV includono risultati + suggerimenti.
 
 ### Privacy
 - Diagnostica locale.
+- Le esportazioni vengono salvate localmente (predefinito: cartella Download) e non vengono inviate da nessuna parte.
+- I percorsi di rete sono bloccati per esportazioni/baseline per mantenere i dati locali.
+- Nessuna telemetria o upload delle diagnosi; solo il test di velocità opzionale invia traffico sintetico agli endpoint di test.
 - Rilevamento lingua via IP; nulla viene salvato.
 
 ### Consigli download
@@ -443,10 +489,13 @@
 - Lengkap: performa maksimum.
 
 ### Ekspor
-- TXT/PDF berisi hasil + saran.
+- TXT, PDF, JSON, dan CSV berisi hasil + saran.
 
 ### Privasi
 - Diagnostik lokal.
+- Ekspor disimpan secara lokal (default: folder Unduhan) dan tidak dikirim ke mana pun.
+- Jalur jaringan diblokir untuk ekspor/baseline agar data tetap lokal.
+- Tanpa telemetri atau unggah diagnostik; hanya uji kecepatan opsional yang mengirim trafik sintetis ke endpoint uji.
 - Deteksi bahasa via IP; tidak disimpan.
 
 ### Tips unduhan
@@ -455,4 +504,3 @@
 - Panduan "first run" singkat.
 - Opsi portable + installer.
 - Publikasikan hash.
-
