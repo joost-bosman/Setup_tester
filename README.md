@@ -1,3 +1,6 @@
+# still in development stage. 
+# does not work, yet.
+
 # Setup_tester
 
 ![Build](https://img.shields.io/github/actions/workflow/status/joost-bosman/Setup_tester/build-release.yml?label=build)
